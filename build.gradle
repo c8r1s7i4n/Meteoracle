@@ -55,6 +55,14 @@ dependencies {
 	implementation 'org.slf4j:slf4j-api:2.0.17'
 	// Source: https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test:4.0.3'
+
+	// Source: https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp
+	implementation 'com.squareup.okhttp3:okhttp:5.3.2'
+
+	// Source: https://mvnrepository.com/artifact/org.mapstruct/mapstruct
+	implementation 'org.mapstruct:mapstruct:1.6.3'
+	// Source: https://mvnrepository.com/artifact/org.mapstruct/mapstruct-processor
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 }
 
 dependencyManagement {
@@ -71,3 +79,5 @@ jte {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+

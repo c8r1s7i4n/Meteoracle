@@ -1,4 +1,4 @@
-package de.omnp.meteoracle.application.domain.vda4994;
+package de.omnp.meteoracle.infrastructure.api.dto;
 
 import java.util.Arrays;
 
@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(value = Include.NON_NULL)
-public class JsonData {
+public class JsonDataDTO {
 
     private String specification_ID;
     private String specification_version;
@@ -41,9 +41,9 @@ public class JsonData {
     //dient für das entgegennehmen des automatisch erzeugten Zeitstempels von der API
     private String timestamp;
 
-    public JsonData() {}
+    public JsonDataDTO() {}
 
-    public JsonData(String[][][] di)
+    public JsonDataDTO(String[][][] di)
     {
         unpackData(di);    
     }

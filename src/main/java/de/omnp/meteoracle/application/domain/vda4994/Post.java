@@ -1,27 +1,22 @@
 package de.omnp.meteoracle.application.domain.vda4994;
 
-import com.google.gson.annotations.SerializedName;                                                  //Hier wird mit gson (Retrofit) gearbeitet, welches die Java Objekte in JSON konvertiert. 
-
 public class Post
 {
-    //Diese Felder sind Pflicht-Felder für die API
     private String symbology;
     private String value;
     private String timestamp;
     private String deviceId;
     private String type;
-
+    
     //Hier werden die "nested" Objekte definiert
     private JLocation location;
     private JsonData jsonData;
 
-    @SerializedName("id")                                                                           //Sollte der Variablenname nicht mit dem Json objekt übereinstimmen, kann man dies durch die Notation "@SerializedName()" angeben
     private String id;
 
-    // default constructor for Jackson
+    // default constructor for Jackson (testing purpose)
     public Post() {}
 
-    // TODO Eventuell noch @NotNull definieren
     public Post(String symbology, String value, String timestamp, String deviceId, String type, JLocation jLocation, JsonData jsonData)
     {
         this.symbology = symbology;
@@ -68,11 +63,37 @@ public class Post
         this.location = location;
     }
 
+    // Setter sind wichtig für den Mapper (mapstruct) (Interface)
+
     public JsonData getJsonData() {
         return jsonData;
     }
 
     public void setJsonData(JsonData jsonData) {
         this.jsonData = jsonData;
+    }
+
+    public void setSymbology(String symbology) {
+        this.symbology = symbology;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }
