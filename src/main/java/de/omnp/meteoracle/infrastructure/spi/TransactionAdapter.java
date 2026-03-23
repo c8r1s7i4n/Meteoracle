@@ -1,0 +1,276 @@
+package de.omnp.meteoracle.infrastructure.spi;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import de.omnp.meteoracle.application.domain.MoveCall.NotarizationMetadata;
+import de.omnp.meteoracle.application.domain.vda4994.Post;
+import de.omnp.meteoracle.application.port.ScanSender;
+import de.omnp.meteoracle.infrastructure.spi.curl.IotaCallWrapper;
+import de.omnp.meteoracle.infrastructure.spi.curl.MoveCallParam;
+import de.omnp.meteoracle.infrastructure.spi.curl.UnsafeMoveCallParam;
+import de.omnp.meteoracle.jota.IntentMessage;
+import de.omnp.meteoracle.jota.Signer;
+import de.omnp.meteoracle.jota.Wallet;
+
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
+@Service
+public class TransactionAdapter implements ScanSender {
+
+    private Logger logger = LoggerFactory.getLogger(getClass());
+
+    // Preparing the object and metadata
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final MediaType mediaType = MediaType.parse("application/json");
+    private static final OkHttpClient client = new OkHttpClient().newBuilder()
+            .build();
+
+    /**
+     * Sends an unsafe move_call through the Transaction Builder API of the RPC-Node
+     * <br>
+     * Prepares the tx_bytes for signing.
+     */
+    @Override
+    public boolean sendTransaction(Post post, Wallet wallet, NotarizationMetadata metadata) {
+        String txBytes = prepareTransaction(post, wallet, metadata);
+
+        if (txBytes != null) {
+            List<String> signature = new ArrayList<>();
+            String sig = sign(Base64.getDecoder().decode(txBytes), wallet);
+            signature.add(sig);
+            if (sig != null) {
+                if (executeTransaction(txBytes, signature, metadata)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                logger.error("Error while signing the transaction");
+            }
+        } else {
+            logger.error("Error while getting the tx_bytes - (Probably too less Gas)");
+        }
+        return false;
+    }
+
+    // TODO: Hier noch den scan (post) miteinbeziehen
+    private String prepareTransaction(Post post, Wallet wallet, NotarizationMetadata metadata) {
+        
+        String preparedCallBody = null;
+        List<String> data = null;
+
+        // In dieser Reihenfolge! Wie im Vertrag (SC) definiert. (Create)
+        data = new ArrayList<String>();
+        data.add(post.getPackageId());
+        data.add(post.getSymbology());
+        data.add(post.getValue());
+        data.add(post.getTimestamp());
+        data.add(post.getDeviceId());
+        data.add(post.getType());
+        data.add(String.valueOf(post.getLocation().getLatitude()));
+        data.add(String.valueOf(post.getLocation().getLongitude()));
+        data.add("0x6");    // System clock address
+        
+        try {
+            // Generates the Request Body
+            preparedCallBody = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(
+                    new IotaCallWrapper<UnsafeMoveCallParam>("unsafe_moveCall", new UnsafeMoveCallParam(
+                            wallet.getAddress(), metadata.packageId(), metadata.module(), metadata.createFunction(), metadata.gasBudget(), data)));
+        } catch (JsonProcessingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }   
+
+        RequestBody body = RequestBody.create(preparedCallBody, mediaType);
+
+        Request request = new Request.Builder()
+                .url(metadata.rpcUrl())
+                .method("POST", body)
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+                .build();
+
+        try {
+            Response response = client.newCall(request).execute();
+            if (response.isSuccessful()) {
+                String responseBody = response.body().string(); // Einmal lesen
+                JsonNode rootNode = objectMapper.readTree(responseBody);
+                JsonNode resultNode = rootNode.path("result");
+
+                if (!resultNode.isMissingNode()) {
+                    String txBytes = resultNode.path("txBytes").asText();
+                    return txBytes;
+                } else {
+                    logger.error("Could not find result field in response");
+                }
+            } else {
+                logger.error(
+                        "Error sending the transaction into the network. RPC node response code: " + response.code());
+                return null;
+            }
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return null;
+        }
+        return null;
+    }
+
+    // For the updating process
+    private String prepareTransaction(Post post, Wallet wallet, NotarizationMetadata metadata, String objectAddress) {
+        
+        String preparedCallBody = null;
+        List<String> data = null;
+
+        // In dieser Reihenfolge! Wie im Vertrag (SC) definiert. (Update)
+        data = new ArrayList<String>();
+        data.add(objectAddress);
+        data.add(post.getPackageId());
+        data.add(post.getSymbology());
+        data.add(post.getValue());
+        data.add(post.getTimestamp());
+        data.add(post.getDeviceId());
+        data.add(post.getType());
+        data.add(String.valueOf(post.getLocation().getLatitude()));
+        data.add(String.valueOf(post.getLocation().getLongitude()));
+        data.add("0x6");    // System clock address
+
+        try {
+            // Generates the Request Body
+            preparedCallBody = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(
+                    new IotaCallWrapper<UnsafeMoveCallParam>("unsafe_moveCall", new UnsafeMoveCallParam(
+                        wallet.getAddress(), metadata.packageId(), metadata.module(), metadata.updateFunction(), metadata.gasBudget(), data)));
+        } catch (JsonProcessingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }   
+
+        RequestBody body = RequestBody.create(preparedCallBody, mediaType);
+
+        Request request = new Request.Builder()
+                .url(metadata.rpcUrl())
+                .method("POST", body)
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+                .build();
+
+        try {
+            Response response = client.newCall(request).execute();
+            if (response.isSuccessful()) {
+
+                String responseBody = response.body().string(); // Einmal lesen
+                JsonNode rootNode = objectMapper.readTree(responseBody);
+                JsonNode resultNode = rootNode.path("result");
+
+                if (!resultNode.isMissingNode()) {
+                    String txBytes = resultNode.path("txBytes").asText();
+                    return txBytes;
+                } else {
+                    logger.error("Could not find result field in response");
+                }
+            } else {
+                logger.error(
+                        "Error sending the transaction into the network. RPC node response code: " + response.code());
+                return null;
+            }
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return null;
+        }
+        return null;
+    }
+
+    private String sign(byte[] txBytes, Wallet wallet) {
+        try {
+            byte[] intentMessageHash = IntentMessage.createIntentMessage(IntentMessage.TRANSACTION_DATA, txBytes);
+            byte[] signature = Signer.signHash(intentMessageHash, wallet.getRawPrivKey());
+            byte[] payload = Signer.assembleEd25519Payload(signature, wallet.getRawPublicKey());
+
+            return Base64.getEncoder().encodeToString(payload);
+
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return null;
+    }
+
+    // TODO: Eventuell noch einen dry-run vorher
+    private boolean executeTransaction(String txBytes, List<String> signatures, NotarizationMetadata metadata) {
+        try {
+            String preparedCallBody = objectMapper.writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(new IotaCallWrapper<MoveCallParam>("iota_executeTransactionBlock",
+                            new MoveCallParam(txBytes, signatures)));
+
+            RequestBody body = RequestBody.create(preparedCallBody, mediaType);
+
+            Request request = new Request.Builder()
+                    .url(metadata.rpcUrl())
+                    .method("POST", body)
+                    .addHeader("Content-Type", "application/json")
+                    .addHeader("Accept", "application/json")
+                    .build();
+
+            try {
+                Response response = client.newCall(request).execute();
+                if (response.isSuccessful()) {
+                    return true;
+                } else {
+                    logger.error("Error sending the transaction into the network. RPC node response code: "
+                            + response.code());
+                    return false;
+                }
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                return false;
+            }
+
+        } catch (JsonProcessingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
+    public boolean updateTransaction(Post post, Wallet wallet, NotarizationMetadata metadata, String objectAddress) {
+        
+        String txBytes = prepareTransaction(post, wallet, metadata, objectAddress);
+
+        if (txBytes != null) {
+            List<String> signature = new ArrayList<>();
+            String sig = sign(Base64.getDecoder().decode(txBytes), wallet);
+            signature.add(sig);
+            if (sig != null) {
+                if (executeTransaction(txBytes, signature, metadata)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                logger.error("Error while signing the transaction");
+            }
+        } else {
+            logger.error("Error while getting the tx_bytes when updating (Probably too less Gas)");
+        }
+        return false;
+    }
+}

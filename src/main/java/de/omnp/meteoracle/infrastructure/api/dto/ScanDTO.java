@@ -2,13 +2,20 @@ package de.omnp.meteoracle.infrastructure.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 
+@JsonPropertyOrder({ "package_id", "symbology", "value", "timestamp", "deviceId", "type", "location", "jsonData" })
 public class ScanDTO
 {
     //Diese Felder sind Pflicht-Felder für die API
+    @Schema(description = "The unique package ID")
+    @NotNull
+    private String package_id;
+
     @Schema(description = "The barcode symbology used, for instance EAN-13.")
     @NotNull
     private String symbology;
@@ -45,8 +52,10 @@ public class ScanDTO
     // default constructor for Jackson (testing purpose)
     public ScanDTO() {}
 
-    public ScanDTO(String symbology, String value, String timestamp, String deviceId, String type, JLocationDTO jLocation, JsonDataDTO jsonData)
+    public ScanDTO(String package_id, String symbology, String value, String timestamp, String deviceId, String type, JLocationDTO jLocation, JsonDataDTO jsonData)
     {
+        this.package_id = package_id;
+
         this.symbology = symbology;
         this.value = value;
 
@@ -57,6 +66,19 @@ public class ScanDTO
         this.timestamp = timestamp;
 
         this.jsonData = jsonData;
+    }
+
+    @JsonProperty("package_id")
+    public void setPackageId(String packageId) {
+        this.package_id = packageId;
+    }
+
+    // Is here instead of the top variable defined because the method name does not match the declared class variable
+    @JsonProperty("package_id")
+    @Schema(description = "The unique package ID")
+    @NotNull
+    public String getPackageId() {
+        return this.package_id;
     }
 
     public String getSymbology() {

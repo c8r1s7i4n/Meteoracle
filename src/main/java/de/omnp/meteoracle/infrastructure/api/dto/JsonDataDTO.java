@@ -24,7 +24,7 @@ public class JsonDataDTO {
     private String unit_of_measure;
     private String gross_weight;
     private String item_number;
-    private String package_ID;
+    // private String package_ID;
     private String packing_material_type;
     private String expiration_date;
     private String production_date;
@@ -98,17 +98,17 @@ public class JsonDataDTO {
         if (di[0][2][Arrays.asList(di[0][1]).indexOf("Item number")]!=null && !di[0][2][Arrays.asList(di[0][1]).indexOf("Item number")].equals(""))
         {this.item_number = di[0][2][Arrays.asList(di[0][1]).indexOf("Item number")];}
 
-        if (di[0][2][Arrays.asList(di[0][1]).indexOf("Package ID J")]!=null && !di[0][2][Arrays.asList(di[0][1]).indexOf("Package ID J")].equals(""))
-        {this.package_ID = di[0][2][Arrays.asList(di[0][1]).indexOf("Package ID J")];}
+        // if (di[0][2][Arrays.asList(di[0][1]).indexOf("Package ID J")]!=null && !di[0][2][Arrays.asList(di[0][1]).indexOf("Package ID J")].equals(""))
+        // {this.package_ID = di[0][2][Arrays.asList(di[0][1]).indexOf("Package ID J")];}
 
-        if (di[0][2][Arrays.asList(di[0][1]).indexOf("Package ID 1J")]!=null && !di[0][2][Arrays.asList(di[0][1]).indexOf("Package ID 1J")].equals(""))
-        {this.package_ID = di[0][2][Arrays.asList(di[0][1]).indexOf("Package ID 1J")];}
+        // if (di[0][2][Arrays.asList(di[0][1]).indexOf("Package ID 1J")]!=null && !di[0][2][Arrays.asList(di[0][1]).indexOf("Package ID 1J")].equals(""))
+        // {this.package_ID = di[0][2][Arrays.asList(di[0][1]).indexOf("Package ID 1J")];}
 
-        if (di[0][2][Arrays.asList(di[0][1]).indexOf("Package ID 5J")]!=null && !di[0][2][Arrays.asList(di[0][1]).indexOf("Package ID 5J")].equals(""))
-        {this.package_ID = di[0][2][Arrays.asList(di[0][1]).indexOf("Package ID 5J")];}
+        // if (di[0][2][Arrays.asList(di[0][1]).indexOf("Package ID 5J")]!=null && !di[0][2][Arrays.asList(di[0][1]).indexOf("Package ID 5J")].equals(""))
+        // {this.package_ID = di[0][2][Arrays.asList(di[0][1]).indexOf("Package ID 5J")];}
 
-        if (di[0][2][Arrays.asList(di[0][1]).indexOf("Package ID 6J")]!=null && !di[0][2][Arrays.asList(di[0][1]).indexOf("Package ID 6J")].equals(""))
-        {this.package_ID = di[0][2][Arrays.asList(di[0][1]).indexOf("Package ID 6J")];}
+        // if (di[0][2][Arrays.asList(di[0][1]).indexOf("Package ID 6J")]!=null && !di[0][2][Arrays.asList(di[0][1]).indexOf("Package ID 6J")].equals(""))
+        // {this.package_ID = di[0][2][Arrays.asList(di[0][1]).indexOf("Package ID 6J")];}
 
         if (di[0][2][Arrays.asList(di[0][1]).indexOf("Packing material type")]!=null && !di[0][2][Arrays.asList(di[0][1]).indexOf("Packing material type")].equals(""))
         {this.packing_material_type = di[0][2][Arrays.asList(di[0][1]).indexOf("Packing material type")];}
@@ -212,9 +212,9 @@ public class JsonDataDTO {
         return item_number;
     }
 
-    public String getPackage_ID() {
-        return package_ID;
-    }
+    // public String getPackage_ID() {
+    //     return package_ID;
+    // }
 
     public String getPacking_material_type() {
         return packing_material_type;

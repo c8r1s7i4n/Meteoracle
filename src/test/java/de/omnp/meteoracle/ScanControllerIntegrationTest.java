@@ -5,12 +5,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import de.omnp.meteoracle.application.domain.vda4994.Post;
-import de.omnp.meteoracle.application.port.TransactionInterface;
-import de.omnp.meteoracle.infrastructure.spi.ScanTransaction;
+import de.omnp.meteoracle.application.port.ScanReceiver;
+import de.omnp.meteoracle.application.service.TransactionService;
 import de.omnp.meteoracle.infrastructure.api.ScanController;
 import de.omnp.meteoracle.infrastructure.api.ScannerMapper;
 import de.omnp.meteoracle.infrastructure.api.dto.JLocationDTO;
 import de.omnp.meteoracle.infrastructure.api.dto.ScanDTO;
+import de.omnp.meteoracle.infrastructure.spi.TransactionAdapter;
+import de.omnp.meteoracle.infrastructure.spi.TransactionReflection;
 import tools.jackson.databind.ObjectMapper;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -39,9 +41,13 @@ public class ScanControllerIntegrationTest {
 
     @BeforeEach
     public void setup() {
-       this.mapper = Mappers.getMapper(ScannerMapper.class);
+        this.mapper = Mappers.getMapper(ScannerMapper.class);
 
-        TransactionInterface realService = new ScanTransaction(); 
+        TransactionAdapter transactionAdapter = new TransactionAdapter();
+        TransactionReflection transactionReflection = new TransactionReflection();
+
+
+        ScanReceiver realService = new TransactionService(transactionAdapter, transactionReflection);
         scanController = new ScanController(realService, Mappers.getMapper(ScannerMapper.class)); // Konstruktor-Injection
         mockMvc = MockMvcBuilders.standaloneSetup(scanController).build();
     }
@@ -51,6 +57,7 @@ public class ScanControllerIntegrationTest {
     public void testScan() throws Exception {
 
         String jsonBodyString = "{"
+            + "\"package_id\": \"GFS\"," 
             + "\"symbology\": \"EAN-13\","
             + "\"value\": \"3700123300014\","
             + "\"timestamp\": \"2026-03-01T12:00:00Z\","
@@ -75,7 +82,7 @@ public class ScanControllerIntegrationTest {
     void convertPOJOtoJSON() throws Exception {
 
         // Demo GTL Label data
-        Post post = new Post("EAN-13",
+        Post post = new Post("Package 01x355","EAN-13",
             "3700123300014",
             "2026-03-01T12:00:00Z",
             "myAndroidScanner",
@@ -100,7 +107,7 @@ public class ScanControllerIntegrationTest {
     @Test
     void shouldMapDtoToDomain() {
 
-        ScanDTO dto = new ScanDTO("EAN-13",
+        ScanDTO dto = new ScanDTO("Package 01x333","EAN-13",
          "3700123300014",
          "2026-03-01T12:00:00Z",
          "myAndroidScanner",
