@@ -1,4 +1,4 @@
-package de.omnp.meteoracle.application.domain.MoveCall;
+package de.omnp.meteoracle.infrastructure.MoveCall;
 
 public class MoveCallCommand {
     private final String signer;

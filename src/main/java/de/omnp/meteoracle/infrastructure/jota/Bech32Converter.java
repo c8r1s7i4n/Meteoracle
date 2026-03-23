@@ -1,4 +1,4 @@
-package de.omnp.meteoracle.jota;
+package de.omnp.meteoracle.infrastructure.jota;
 
 import java.io.ByteArrayOutputStream;
 

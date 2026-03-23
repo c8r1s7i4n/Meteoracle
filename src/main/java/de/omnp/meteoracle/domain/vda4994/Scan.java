@@ -1,9 +1,9 @@
-package de.omnp.meteoracle.application.domain.vda4994;
+package de.omnp.meteoracle.domain.vda4994;
 
-public class Post
+public class Scan
 {
     // Unique identifier
-    private String package_ID;
+    private String package_id;
     
     private String symbology;
     private String value;
@@ -18,11 +18,11 @@ public class Post
     private String id;
 
     // default constructor for Jackson (testing purpose)
-    public Post() {}
+    public Scan() {}
 
-    public Post(String package_ID, String symbology, String value, String timestamp, String deviceId, String type, JLocation jLocation, JsonData jsonData)
+    public Scan(String package_id, String symbology, String value, String timestamp, String deviceId, String type, JLocation jLocation, JsonData jsonData)
     {
-        this.package_ID = package_ID;
+        this.package_id = package_id;
 
         this.symbology = symbology;
         this.value = value;
@@ -65,7 +65,7 @@ public class Post
     }
 
     public String getPackageId() {
-        return this.package_ID;
+        return this.package_id;
     }
 
     public void setLocation(JLocation location) {
@@ -107,6 +107,6 @@ public class Post
     }
 
     public void setPackageId(String packageId) {
-        this.package_ID = packageId;
+        this.package_id = packageId;
     }
 }

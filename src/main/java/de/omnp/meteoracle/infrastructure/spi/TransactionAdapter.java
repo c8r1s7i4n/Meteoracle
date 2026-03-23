@@ -7,23 +7,19 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import de.omnp.meteoracle.application.domain.MoveCall.NotarizationMetadata;
-import de.omnp.meteoracle.application.domain.vda4994.Post;
-import de.omnp.meteoracle.application.port.ScanSender;
+import de.omnp.meteoracle.application.port.out.ScanSender;
+import de.omnp.meteoracle.domain.vda4994.Scan;
+import de.omnp.meteoracle.infrastructure.jota.IntentMessage;
+import de.omnp.meteoracle.infrastructure.jota.Signer;
 import de.omnp.meteoracle.infrastructure.spi.curl.IotaCallWrapper;
 import de.omnp.meteoracle.infrastructure.spi.curl.MoveCallParam;
 import de.omnp.meteoracle.infrastructure.spi.curl.UnsafeMoveCallParam;
-import de.omnp.meteoracle.jota.IntentMessage;
-import de.omnp.meteoracle.jota.Signer;
-import de.omnp.meteoracle.jota.Wallet;
-
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -47,15 +43,15 @@ public class TransactionAdapter implements ScanSender {
      * Prepares the tx_bytes for signing.
      */
     @Override
-    public boolean sendTransaction(Post post, Wallet wallet, NotarizationMetadata metadata) {
-        String txBytes = prepareTransaction(post, wallet, metadata);
+    public boolean sendTransaction(Scan scan) {
+        String txBytes = prepareTransaction(scan);
 
         if (txBytes != null) {
             List<String> signature = new ArrayList<>();
-            String sig = sign(Base64.getDecoder().decode(txBytes), wallet);
+            String sig = sign(Base64.getDecoder().decode(txBytes));
             signature.add(sig);
             if (sig != null) {
-                if (executeTransaction(txBytes, signature, metadata)) {
+                if (executeTransaction(txBytes, signature)) {
                     return true;
                 } else {
                     return false;
@@ -70,28 +66,28 @@ public class TransactionAdapter implements ScanSender {
     }
 
     // TODO: Hier noch den scan (post) miteinbeziehen
-    private String prepareTransaction(Post post, Wallet wallet, NotarizationMetadata metadata) {
+    private String prepareTransaction(Scan scan) {
         
         String preparedCallBody = null;
         List<String> data = null;
 
         // In dieser Reihenfolge! Wie im Vertrag (SC) definiert. (Create)
         data = new ArrayList<String>();
-        data.add(post.getPackageId());
-        data.add(post.getSymbology());
-        data.add(post.getValue());
-        data.add(post.getTimestamp());
-        data.add(post.getDeviceId());
-        data.add(post.getType());
-        data.add(String.valueOf(post.getLocation().getLatitude()));
-        data.add(String.valueOf(post.getLocation().getLongitude()));
+        data.add(scan.getPackageId());
+        data.add(scan.getSymbology());
+        data.add(scan.getValue());
+        data.add(scan.getTimestamp());
+        data.add(scan.getDeviceId());
+        data.add(scan.getType());
+        data.add(String.valueOf(scan.getLocation().getLatitude()));
+        data.add(String.valueOf(scan.getLocation().getLongitude()));
         data.add("0x6");    // System clock address
         
         try {
             // Generates the Request Body
             preparedCallBody = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(
                     new IotaCallWrapper<UnsafeMoveCallParam>("unsafe_moveCall", new UnsafeMoveCallParam(
-                            wallet.getAddress(), metadata.packageId(), metadata.module(), metadata.createFunction(), metadata.gasBudget(), data)));
+                            IotaMetadata.address, IotaMetadata.packageId, IotaMetadata.module, IotaMetadata.createFunction, IotaMetadata.gasBudget, data)));
         } catch (JsonProcessingException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -100,7 +96,7 @@ public class TransactionAdapter implements ScanSender {
         RequestBody body = RequestBody.create(preparedCallBody, mediaType);
 
         Request request = new Request.Builder()
-                .url(metadata.rpcUrl())
+                .url(IotaMetadata.rpcUrl)
                 .method("POST", body)
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Accept", "application/json")
@@ -133,7 +129,7 @@ public class TransactionAdapter implements ScanSender {
     }
 
     // For the updating process
-    private String prepareTransaction(Post post, Wallet wallet, NotarizationMetadata metadata, String objectAddress) {
+    private String prepareTransaction(Scan post, String objectAddress) {
         
         String preparedCallBody = null;
         List<String> data = null;
@@ -155,7 +151,7 @@ public class TransactionAdapter implements ScanSender {
             // Generates the Request Body
             preparedCallBody = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(
                     new IotaCallWrapper<UnsafeMoveCallParam>("unsafe_moveCall", new UnsafeMoveCallParam(
-                        wallet.getAddress(), metadata.packageId(), metadata.module(), metadata.updateFunction(), metadata.gasBudget(), data)));
+                        IotaMetadata.address, IotaMetadata.packageId, IotaMetadata.module, IotaMetadata.updateFunction, IotaMetadata.gasBudget, data)));
         } catch (JsonProcessingException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -164,7 +160,7 @@ public class TransactionAdapter implements ScanSender {
         RequestBody body = RequestBody.create(preparedCallBody, mediaType);
 
         Request request = new Request.Builder()
-                .url(metadata.rpcUrl())
+                .url(IotaMetadata.rpcUrl)
                 .method("POST", body)
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Accept", "application/json")
@@ -197,11 +193,11 @@ public class TransactionAdapter implements ScanSender {
         return null;
     }
 
-    private String sign(byte[] txBytes, Wallet wallet) {
+    private String sign(byte[] txBytes) {
         try {
             byte[] intentMessageHash = IntentMessage.createIntentMessage(IntentMessage.TRANSACTION_DATA, txBytes);
-            byte[] signature = Signer.signHash(intentMessageHash, wallet.getRawPrivKey());
-            byte[] payload = Signer.assembleEd25519Payload(signature, wallet.getRawPublicKey());
+            byte[] signature = Signer.signHash(intentMessageHash, IotaMetadata.wallet.getRawPrivKey());
+            byte[] payload = Signer.assembleEd25519Payload(signature, IotaMetadata.wallet.getRawPublicKey());
 
             return Base64.getEncoder().encodeToString(payload);
 
@@ -213,7 +209,7 @@ public class TransactionAdapter implements ScanSender {
     }
 
     // TODO: Eventuell noch einen dry-run vorher
-    private boolean executeTransaction(String txBytes, List<String> signatures, NotarizationMetadata metadata) {
+    private boolean executeTransaction(String txBytes, List<String> signatures) {
         try {
             String preparedCallBody = objectMapper.writerWithDefaultPrettyPrinter()
                     .writeValueAsString(new IotaCallWrapper<MoveCallParam>("iota_executeTransactionBlock",
@@ -222,7 +218,7 @@ public class TransactionAdapter implements ScanSender {
             RequestBody body = RequestBody.create(preparedCallBody, mediaType);
 
             Request request = new Request.Builder()
-                    .url(metadata.rpcUrl())
+                    .url(IotaMetadata.rpcUrl)
                     .method("POST", body)
                     .addHeader("Content-Type", "application/json")
                     .addHeader("Accept", "application/json")
@@ -251,16 +247,16 @@ public class TransactionAdapter implements ScanSender {
     }
 
     @Override
-    public boolean updateTransaction(Post post, Wallet wallet, NotarizationMetadata metadata, String objectAddress) {
+    public boolean updateTransaction(Scan post, String objectAddress) {
         
-        String txBytes = prepareTransaction(post, wallet, metadata, objectAddress);
+        String txBytes = prepareTransaction(post, objectAddress);
 
         if (txBytes != null) {
             List<String> signature = new ArrayList<>();
-            String sig = sign(Base64.getDecoder().decode(txBytes), wallet);
+            String sig = sign(Base64.getDecoder().decode(txBytes));
             signature.add(sig);
             if (sig != null) {
-                if (executeTransaction(txBytes, signature, metadata)) {
+                if (executeTransaction(txBytes, signature)) {
                     return true;
                 } else {
                     return false;

@@ -1,4 +1,4 @@
-package de.omnp.meteoracle.application.domain.vda4994;
+package de.omnp.meteoracle.domain.vda4994;
 
 import java.util.Arrays;
 

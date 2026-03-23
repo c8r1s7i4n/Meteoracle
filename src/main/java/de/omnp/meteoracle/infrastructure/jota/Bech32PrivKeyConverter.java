@@ -1,4 +1,4 @@
-package de.omnp.meteoracle.jota;
+package de.omnp.meteoracle.infrastructure.jota;
 
 import org.bitcoinj.base.Bech32;
 import org.bitcoinj.base.Bech32.Bech32Bytes;

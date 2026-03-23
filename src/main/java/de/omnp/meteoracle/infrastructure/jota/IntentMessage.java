@@ -1,4 +1,4 @@
-package de.omnp.meteoracle.jota;
+package de.omnp.meteoracle.infrastructure.jota;
 
 import org.bouncycastle.crypto.digests.Blake2bDigest;
 import java.nio.ByteBuffer;

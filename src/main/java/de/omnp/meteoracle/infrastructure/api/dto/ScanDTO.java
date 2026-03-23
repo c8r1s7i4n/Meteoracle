@@ -49,6 +49,9 @@ public class ScanDTO
     @Schema(hidden = true)
     private String id;
 
+    @JsonInclude(value = Include.NON_NULL)
+    private String onchain_id;
+
     // default constructor for Jackson (testing purpose)
     public ScanDTO() {}
 
@@ -119,5 +122,47 @@ public class ScanDTO
 
     public void setJsonData(JsonDataDTO jsonData) {
         this.jsonData = jsonData;
+    }
+
+    public void setPackage_id(String package_id) {
+        this.package_id = package_id;
+    }
+
+    public void setSymbology(String symbology) {
+        this.symbology = symbology;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+    
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+    public String getOnchainId() {
+        return this.onchain_id;
+    }
+
+    /**
+     * Sets the on-chain object ID
+     * @param objectId
+     */
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+    public void setOnchainId(String onchainId) {
+        this.onchain_id = onchainId;
     }
 }

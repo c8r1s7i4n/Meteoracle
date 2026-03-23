@@ -1,4 +1,4 @@
-package de.omnp.meteoracle.application.domain.ddd;
+package de.omnp.meteoracle.domain.ddd;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
