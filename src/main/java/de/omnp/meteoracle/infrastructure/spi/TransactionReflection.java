@@ -32,11 +32,19 @@ public class TransactionReflection implements ScanReflection {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
+    // Bean (Component) via constuctor injection
+    private IotaMetadata metadata;
+
     private ScannerMapper mapper;
     
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final MediaType mediaType = MediaType.parse("application/json");
     private static final OkHttpClient client = new OkHttpClient().newBuilder().build();
+
+
+    public TransactionReflection(IotaMetadata metadata) {
+        this.metadata = metadata;
+    }
 
     /**
      * Determine if an object is owned by the address with the same package_id and needs to be updated.
@@ -48,11 +56,11 @@ public class TransactionReflection implements ScanReflection {
             // 1. Request Body vorbereiten
             String fullStructType = String.format(
                     "%1$s::notarization::Notarization<%1$s::%2$s::Scan>", 
-                    IotaMetadata.packageId,
-                    IotaMetadata.module
+                    metadata.packageId,
+                    metadata.module
             );
             
-            GetOwnedObjectsParams queryParams = new GetOwnedObjectsParams(IotaMetadata.address, fullStructType);
+            GetOwnedObjectsParams queryParams = new GetOwnedObjectsParams(metadata.wallet.getAddress(), fullStructType);
             
             String preparedCallBody = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(
                     new IotaCallWrapper<List<Object>>(
@@ -64,7 +72,7 @@ public class TransactionReflection implements ScanReflection {
             // 2. HTTP Request bauen
             RequestBody body = RequestBody.create(preparedCallBody, mediaType);
             Request request = new Request.Builder()
-                    .url(IotaMetadata.rpcUrl)
+                    .url(metadata.rpcUrl)
                     .post(body)
                     .addHeader("Content-Type", "application/json")
                     .addHeader("Accept", "application/json")
@@ -123,11 +131,11 @@ public class TransactionReflection implements ScanReflection {
         try {
             String fullStructType = String.format(
                     "%1$s::notarization::Notarization<%1$s::%2$s::Scan>", 
-                    IotaMetadata.packageId,
-                    IotaMetadata.module
+                    metadata.packageId,
+                    metadata.module
             );
             
-            GetOwnedObjectsParams queryParams = new GetOwnedObjectsParams(IotaMetadata.address, fullStructType);
+            GetOwnedObjectsParams queryParams = new GetOwnedObjectsParams(metadata.wallet.getAddress(), fullStructType);
             
             String preparedCallBody = objectMapper.writeValueAsString(
                     new IotaCallWrapper<List<Object>>(
@@ -138,7 +146,7 @@ public class TransactionReflection implements ScanReflection {
 
             RequestBody body = RequestBody.create(preparedCallBody, mediaType);
             Request request = new Request.Builder()
-                    .url(IotaMetadata.rpcUrl)
+                    .url(metadata.rpcUrl)
                     .post(body)
                     .addHeader("Content-Type", "application/json")
                     .build();
@@ -194,11 +202,11 @@ public class TransactionReflection implements ScanReflection {
         try {
             String fullStructType = String.format(
                     "%1$s::notarization::Notarization<%1$s::%2$s::Scan>", 
-                    IotaMetadata.packageId,
-                    IotaMetadata.module
+                    metadata.packageId,
+                    metadata.module
             );
             
-            GetOwnedObjectsParams queryParams = new GetOwnedObjectsParams(IotaMetadata.address, fullStructType);
+            GetOwnedObjectsParams queryParams = new GetOwnedObjectsParams(metadata.wallet.getAddress(), fullStructType);
             
             String preparedCallBody = objectMapper.writeValueAsString(
                     new IotaCallWrapper<List<Object>>(
@@ -209,7 +217,7 @@ public class TransactionReflection implements ScanReflection {
 
             RequestBody body = RequestBody.create(preparedCallBody, mediaType);
             Request request = new Request.Builder()
-                    .url(IotaMetadata.rpcUrl)
+                    .url(metadata.rpcUrl)
                     .post(body)
                     .addHeader("Content-Type", "application/json")
                     .build();

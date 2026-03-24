@@ -1,25 +1,32 @@
 package de.omnp.meteoracle.infrastructure.spi;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import de.omnp.meteoracle.infrastructure.jota.Wallet;
 
 
-// TODO: Informationen via .env Datei einlesen.
 @Component
 public class IotaMetadata {
+   
+    protected final String rpcUrl;
+    protected final String packageId = "0x30db7baf5bb8432e7f875ae5277e05091effc7b0e824269ecf242cacf0eca1a4";
+    protected final String module = "entry_notarization4994";
+    protected final String createFunction = "notarize_4994_scan";
+    protected final String updateFunction = "update_4994_scan";
+    protected final String privkey;
 
-    protected static String address;
-    protected static final String rpcUrl = "https://api.testnet.iota.cafe:443";
-    protected static final String packageId = "0x30db7baf5bb8432e7f875ae5277e05091effc7b0e824269ecf242cacf0eca1a4";
-    protected static final String module = "entry_notarization4994";
-    protected static final String createFunction = "notarize_4994_scan";
-    protected static final String updateFunction = "update_4994_scan";
-    protected static String gasBudget = "50000000";
+    protected String gasBudget = "50000000";
 
-    protected static final Wallet wallet = new Wallet("iotaprivkey...");
+    protected final Wallet wallet;
 
-    public IotaMetadata() {
-        address = wallet.getAddress();
+    // Reads the .env file due to the dotenv import (build.gradle)
+    public IotaMetadata(
+        @Value("${rpc.url}") String rpcUrl, 
+        @Value("${iota.privkey}") String privkey) {
+    
+    this.rpcUrl = rpcUrl;
+    this.privkey = privkey; // Values are already populated here!
+    this.wallet = new Wallet(privkey); 
     }
 }

@@ -43,3 +43,6 @@ out/
 /jte-classes/
 
 ### Licenced Assets ###
+
+### Secrets ###
+.env

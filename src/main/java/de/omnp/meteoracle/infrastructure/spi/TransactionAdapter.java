@@ -33,10 +33,14 @@ public class TransactionAdapter implements ScanSender {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
+    // Bean (Component) via constuctor injection
+    private IotaMetadata metadata;
+
     private ScannerMapper mapper;
 
-    public TransactionAdapter(ScannerMapper mapper) {
+    public TransactionAdapter(ScannerMapper mapper, IotaMetadata metadata) {
         this.mapper = mapper;
+        this.metadata = metadata;
     }
 
     // Preparing the object and metadata
@@ -102,7 +106,7 @@ public class TransactionAdapter implements ScanSender {
             // Generates the Request Body
             preparedCallBody = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(
                     new IotaCallWrapper<UnsafeMoveCallParam>("unsafe_moveCall", new UnsafeMoveCallParam(
-                            IotaMetadata.address, IotaMetadata.packageId, IotaMetadata.module, IotaMetadata.createFunction, IotaMetadata.gasBudget, data)));
+                        metadata.wallet.getAddress(), metadata.packageId, metadata.module, metadata.createFunction, metadata.gasBudget, data)));
         } catch (JsonProcessingException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -111,7 +115,7 @@ public class TransactionAdapter implements ScanSender {
         RequestBody body = RequestBody.create(preparedCallBody, mediaType);
 
         Request request = new Request.Builder()
-                .url(IotaMetadata.rpcUrl)
+                .url(metadata.rpcUrl)
                 .method("POST", body)
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Accept", "application/json")
@@ -172,7 +176,7 @@ public class TransactionAdapter implements ScanSender {
             // Generates the Request Body
             preparedCallBody = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(
                     new IotaCallWrapper<UnsafeMoveCallParam>("unsafe_moveCall", new UnsafeMoveCallParam(
-                        IotaMetadata.address, IotaMetadata.packageId, IotaMetadata.module, IotaMetadata.updateFunction, IotaMetadata.gasBudget, data)));
+                        metadata.wallet.getAddress(), metadata.packageId, metadata.module, metadata.updateFunction, metadata.gasBudget, data)));
         } catch (JsonProcessingException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -181,7 +185,7 @@ public class TransactionAdapter implements ScanSender {
         RequestBody body = RequestBody.create(preparedCallBody, mediaType);
 
         Request request = new Request.Builder()
-                .url(IotaMetadata.rpcUrl)
+                .url(metadata.rpcUrl)
                 .method("POST", body)
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Accept", "application/json")
@@ -217,8 +221,8 @@ public class TransactionAdapter implements ScanSender {
     private String sign(byte[] txBytes) {
         try {
             byte[] intentMessageHash = IntentMessage.createIntentMessage(IntentMessage.TRANSACTION_DATA, txBytes);
-            byte[] signature = Signer.signHash(intentMessageHash, IotaMetadata.wallet.getRawPrivKey());
-            byte[] payload = Signer.assembleEd25519Payload(signature, IotaMetadata.wallet.getRawPublicKey());
+            byte[] signature = Signer.signHash(intentMessageHash, metadata.wallet.getRawPrivKey());
+            byte[] payload = Signer.assembleEd25519Payload(signature, metadata.wallet.getRawPublicKey());
 
             return Base64.getEncoder().encodeToString(payload);
 
@@ -239,7 +243,7 @@ public class TransactionAdapter implements ScanSender {
             RequestBody body = RequestBody.create(preparedCallBody, mediaType);
 
             Request request = new Request.Builder()
-                    .url(IotaMetadata.rpcUrl)
+                    .url(metadata.rpcUrl)
                     .method("POST", body)
                     .addHeader("Content-Type", "application/json")
                     .addHeader("Accept", "application/json")

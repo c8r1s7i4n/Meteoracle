@@ -21,6 +21,7 @@ import de.omnp.meteoracle.infrastructure.ScannerMapper;
 import de.omnp.meteoracle.infrastructure.api.ScanController;
 import de.omnp.meteoracle.infrastructure.api.dto.JLocationDTO;
 import de.omnp.meteoracle.infrastructure.api.dto.ScanDTO;
+import de.omnp.meteoracle.infrastructure.spi.IotaMetadata;
 import de.omnp.meteoracle.infrastructure.spi.TransactionAdapter;
 import de.omnp.meteoracle.infrastructure.spi.TransactionReflection;
 import tools.jackson.databind.ObjectMapper;
@@ -42,9 +43,10 @@ public class ScanControllerIntegrationTest {
     @BeforeEach
     public void setup() {
         this.mapper = Mappers.getMapper(ScannerMapper.class);
+        IotaMetadata metadata = new IotaMetadata(null, null);
 
-        TransactionAdapter transactionAdapter = new TransactionAdapter(this.mapper);
-        TransactionReflection transactionReflection = new TransactionReflection();
+        TransactionAdapter transactionAdapter = new TransactionAdapter(this.mapper, metadata);
+        TransactionReflection transactionReflection = new TransactionReflection(metadata);
 
 
         ScanReceiver realService = new TransactionService(transactionAdapter, transactionReflection);
