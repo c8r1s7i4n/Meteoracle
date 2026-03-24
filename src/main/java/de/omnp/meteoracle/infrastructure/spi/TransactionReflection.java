@@ -17,7 +17,6 @@ import de.omnp.meteoracle.application.port.out.ScanReflection;
 import de.omnp.meteoracle.domain.vda4994.Scan;
 import de.omnp.meteoracle.infrastructure.ScannerMapper;
 import de.omnp.meteoracle.infrastructure.api.dto.JLocationDTO;
-// TODO: JsonData als raw String in der Blockchain speichern.
 import de.omnp.meteoracle.infrastructure.api.dto.JsonDataDTO;
 import de.omnp.meteoracle.infrastructure.api.dto.ScanDTO;
 import de.omnp.meteoracle.infrastructure.spi.curl.GetOwnedObjectsParams;
@@ -263,24 +262,42 @@ public class TransactionReflection implements ScanReflection {
 
 
     public ScanDTO mapJsonToScan(JsonNode fields) {
-        
         ScanDTO dto = new ScanDTO();
     
-        // Mapping der flachen Felder
+        // 1. Mapping der flachen Felder
         dto.setDeviceId(fields.path("device_id").asText());
         dto.setPackageId(fields.path("package_id").asText());
-        dto.setType(fields.path("scan_type").asText());
+        dto.setType(fields.path("scan_type").asText()); // Achtung: Im RPC hieß es "scan_type"
         dto.setSymbology(fields.path("symbology").asText());
         dto.setTimestamp(fields.path("timestamp").asText());
         dto.setValue(fields.path("value").asText());
-
-        // Mapping der Location (da diese ein Unter-Objekt ist)
+    
+        // 2. Mapping der Location
         JsonNode locationFields = fields.path("location").path("fields");
         if (!locationFields.isMissingNode()) {
-            // Falls dein ScanDTO Felder für Lat/Lon hat:
-            dto.setLocation(new JLocationDTO(locationFields.path("latitude").asDouble(), locationFields.path("longitude").asDouble()));
+            dto.setLocation(new JLocationDTO(
+                locationFields.path("latitude").asDouble(), 
+                locationFields.path("longitude").asDouble()
+            ));
         }
-
+    
+        // 3. Mapping von JsonData (Der "JSON-im-JSON" Teil)
+        // Pfad: json_data -> fields -> content (als String!)
+        JsonNode jsonDataContent = fields.path("json_data")
+                                         .path("fields")
+                                         .path("content");
+    
+        if (!jsonDataContent.isMissingNode()) {
+            String jsonString = jsonDataContent.asText();
+            try {
+                // Wir nutzen den vorhandenen objectMapper, um den String in das DTO zu wandeln
+                JsonDataDTO jsonDataDTO = objectMapper.readValue(jsonString, JsonDataDTO.class);
+                dto.setJsonData(jsonDataDTO);
+            } catch (Exception e) {
+                logger.error("Konnte verschachtelten JsonData-String nicht parsen: " + jsonString, e);
+            }
+        }
+    
         return dto;
     }
 }

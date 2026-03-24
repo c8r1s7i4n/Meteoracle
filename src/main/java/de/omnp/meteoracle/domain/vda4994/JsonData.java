@@ -264,4 +264,124 @@ public class JsonData {
     {
         return timestamp;
     }
+
+    // For Jackson Serializing/Deserialzing
+
+    public void setSpecification_ID(String specification_ID) {
+        this.specification_ID = specification_ID;
+    }
+
+    public void setSpecification_version(String specification_version) {
+        this.specification_version = specification_version;
+    }
+
+    public void setSupplier_number(String supplier_number) {
+        this.supplier_number = supplier_number;
+    }
+
+    public void setCountry_of_origin(String country_of_origin) {
+        this.country_of_origin = country_of_origin;
+    }
+
+    public void setReceiver_plant(String receiver_plant) {
+        this.receiver_plant = receiver_plant;
+    }
+
+    public void setUnloading_point(String unloading_point) {
+        this.unloading_point = unloading_point;
+    }
+
+    public void setStorage_location(String storage_location) {
+        this.storage_location = storage_location;
+    }
+
+    public void setSupplier_number_of_the_Seller(String supplier_number_of_the_Seller) {
+        this.supplier_number_of_the_Seller = supplier_number_of_the_Seller;
+    }
+
+    public void setDelivery_note_number(String delivery_note_number) {
+        this.delivery_note_number = delivery_note_number;
+    }
+
+    public void setShoring_location(String shoring_location) {
+        this.shoring_location = shoring_location;
+    }
+
+    public void setCustom_routing(String custom_routing) {
+        this.custom_routing = custom_routing;
+    }
+
+    public void setExpected_arrival_date(String expected_arrival_date) {
+        this.expected_arrival_date = expected_arrival_date;
+    }
+
+    public void setQuantity(String quantity) {
+        this.quantity = quantity;
+    }
+
+    public void setUnit_of_measure(String unit_of_measure) {
+        this.unit_of_measure = unit_of_measure;
+    }
+
+    public void setGross_weight(String gross_weight) {
+        this.gross_weight = gross_weight;
+    }
+
+    public void setItem_number(String item_number) {
+        this.item_number = item_number;
+    }
+
+    public void setPacking_material_type(String packing_material_type) {
+        this.packing_material_type = packing_material_type;
+    }
+
+    public void setExpiration_date(String expiration_date) {
+        this.expiration_date = expiration_date;
+    }
+
+    public void setProduction_date(String production_date) {
+        this.production_date = production_date;
+    }
+
+    public void setBatch(String batch) {
+        this.batch = batch;
+    }
+
+    public void setHardware_status(String hardware_status) {
+        this.hardware_status = hardware_status;
+    }
+
+    public void setSoftware_status(String software_status) {
+        this.software_status = software_status;
+    }
+
+    public void setChange_status(String change_status) {
+        this.change_status = change_status;
+    }
+
+    public void setAdditional_information_to_the_Part_number(String additional_information_to_the_Part_number) {
+        this.additional_information_to_the_Part_number = additional_information_to_the_Part_number;
+    }
+
+    public void setRoHS_Directive(String roHS_Directive) {
+        this.roHS_Directive = roHS_Directive;
+    }
+
+    public void setSupplier_of_this_position(String supplier_of_this_position) {
+        this.supplier_of_this_position = supplier_of_this_position;
+    }
+
+    public void setManufacturer_part_number(String manufacturer_part_number) {
+        this.manufacturer_part_number = manufacturer_part_number;
+    }
+
+    public void setSmallest_material_Packaging_unit(String smallest_material_Packaging_unit) {
+        this.smallest_material_Packaging_unit = smallest_material_Packaging_unit;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    
 }

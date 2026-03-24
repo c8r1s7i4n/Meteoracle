@@ -15,6 +15,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.omnp.meteoracle.application.port.out.ScanSender;
 import de.omnp.meteoracle.domain.vda4994.Scan;
+import de.omnp.meteoracle.infrastructure.ScannerMapper;
+import de.omnp.meteoracle.infrastructure.api.dto.JsonDataDTO;
 import de.omnp.meteoracle.infrastructure.jota.IntentMessage;
 import de.omnp.meteoracle.infrastructure.jota.Signer;
 import de.omnp.meteoracle.infrastructure.spi.curl.IotaCallWrapper;
@@ -31,13 +33,19 @@ public class TransactionAdapter implements ScanSender {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
+    private ScannerMapper mapper;
+
+    public TransactionAdapter(ScannerMapper mapper) {
+        this.mapper = mapper;
+    }
+
     // Preparing the object and metadata
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final MediaType mediaType = MediaType.parse("application/json");
     private static final OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
-
-    /**
+    
+            /**
      * Sends an unsafe move_call through the Transaction Builder API of the RPC-Node
      * <br>
      * Prepares the tx_bytes for signing.
@@ -81,6 +89,13 @@ public class TransactionAdapter implements ScanSender {
         data.add(scan.getType());
         data.add(String.valueOf(scan.getLocation().getLatitude()));
         data.add(String.valueOf(scan.getLocation().getLongitude()));
+        try {
+            JsonDataDTO dataDTO = mapper.toDto(scan.getJsonData());
+            data.add(objectMapper.writeValueAsString(dataDTO));
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            data.add(null);
+        }
         data.add("0x6");    // System clock address
         
         try {
@@ -145,6 +160,12 @@ public class TransactionAdapter implements ScanSender {
         data.add(post.getType());
         data.add(String.valueOf(post.getLocation().getLatitude()));
         data.add(String.valueOf(post.getLocation().getLongitude()));
+        try {
+            data.add(objectMapper.writeValueAsString(post.getJsonData()));
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            data.add(null);
+        }
         data.add("0x6");    // System clock address
 
         try {

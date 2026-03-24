@@ -24,7 +24,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
-@Tag(name = "Meteoracle API", description = "APIs to interact with the IOTA Rebased network")
+@Tag(name = "Meteoracle API", description = "APIs to interact with the IOTA Rebased network <br> Based on the VDA4994 recommendation for the use of Global Transport Label in the automotive supply chain")
 @RestController
 @RequestMapping("/api/v1")
 public class ScanController {
@@ -49,8 +49,7 @@ public class ScanController {
     public ResponseEntity<Void> scan(@Valid @RequestBody ScanDTO object){
         logger.info("Received scan for POST transaction from device " + object.getDeviceId());
         // Convert DTO into Domain Object
-        Scan post = mapper.toDomain(object);
-        
+        Scan post = mapper.toDomain(object);        
         if (transaction.checkIn(post)) {
             return ResponseEntity.status(HttpStatus.OK).build();
         } else {
@@ -68,7 +67,7 @@ public class ScanController {
         List<ScanDTO> scansDTO = new ArrayList<>();
         
         // 2. Umwandlung von Domänen-Objekt (Scan) zu Transfer-Objekt (ScanDTO)
-        // Wenn du MapStruct nutzt: mapper.toDtoList(scans)
+        // via MapStruct -> mapper.toDtoList(scans)
         // Hier als Beispiel mit Java Streams:
         for (ScanPak scan : scans) {
             ScanDTO dto = mapper.toDto(scan.scan());
@@ -80,7 +79,7 @@ public class ScanController {
         return ResponseEntity.ok(scansDTO);
     }
 
-    @Operation(summary = "API to get a specific owned Scan Notarization objects according to the package ID")
+    @Operation(summary = "API to get a specific owned Scan Notarization object according to the package ID")
     @GetMapping(path = "/scan/{package_id}")
     public ResponseEntity<ScanDTO>getScanById(@PathVariable(name = "package_id") String package_id)
     { 

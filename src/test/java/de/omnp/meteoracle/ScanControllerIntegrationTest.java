@@ -43,7 +43,7 @@ public class ScanControllerIntegrationTest {
     public void setup() {
         this.mapper = Mappers.getMapper(ScannerMapper.class);
 
-        TransactionAdapter transactionAdapter = new TransactionAdapter();
+        TransactionAdapter transactionAdapter = new TransactionAdapter(this.mapper);
         TransactionReflection transactionReflection = new TransactionReflection();
 
 

@@ -1,5 +1,6 @@
 package de.omnp.meteoracle.infrastructure;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 import de.omnp.meteoracle.domain.vda4994.JLocation;
 import de.omnp.meteoracle.domain.vda4994.JsonData;
@@ -7,6 +8,7 @@ import de.omnp.meteoracle.domain.vda4994.Scan;
 import de.omnp.meteoracle.infrastructure.api.dto.JLocationDTO;
 import de.omnp.meteoracle.infrastructure.api.dto.JsonDataDTO;
 import de.omnp.meteoracle.infrastructure.api.dto.ScanDTO;
+
 
 @Mapper(componentModel = "spring")
 public interface ScannerMapper {
@@ -27,6 +29,8 @@ public interface ScannerMapper {
      * OPTIONAL als Antwort an den Client
      */
     // @Mapping(source = "id", target = "deviceId") // Jetzt ist 'id' die Quelle (Domain)
+    @Mapping(source = "packageId", target = "package_id")
+    @Mapping(target = "onchainId", ignore = true)
     public ScanDTO toDto(Scan domainObj);
     public JsonDataDTO toDto(JsonData domainObj);
     public JLocationDTO toDoto(JLocation domainObj);

@@ -4,10 +4,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 
+// Reihenfolge für die API zum anzeigen
 @JsonPropertyOrder({ "package_id", "symbology", "value", "timestamp", "deviceId", "type", "location", "jsonData" })
 public class ScanDTO
 {
@@ -42,7 +42,7 @@ public class ScanDTO
     private JLocationDTO location;
 
     @JsonInclude(value = Include.NON_NULL)
-    @Schema(description = "Additional scanned information.")
+    @Schema(description = "Additional scanned information. Only use these fields if necessary, as they increase the gas price.")
     private JsonDataDTO jsonData;
 
     @JsonInclude(value = Include.NON_NULL)
