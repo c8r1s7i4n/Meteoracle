@@ -24,7 +24,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
-@Tag(name = "Meteoracle API", description = "APIs to interact with the IOTA Rebased network <br> Based on the VDA4994 recommendation for the use of Global Transport Label in the automotive supply chain")
+@Tag(name = "Meteoracle API", description = "APIs to interact with the IOTA Rebased Network <br> Based on the VDA4994 recommendation for the use of Global Transport Label in the automotive supply chain")
 @RestController
 @RequestMapping("/api/v1")
 public class ScanController {
