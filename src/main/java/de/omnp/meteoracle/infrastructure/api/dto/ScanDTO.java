@@ -8,7 +8,18 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 
 // Reihenfolge für die API zum anzeigen
-@JsonPropertyOrder({ "package_id", "symbology", "value", "timestamp", "deviceId", "type", "location", "jsonData" })
+@JsonPropertyOrder({ 
+    "package_id", 
+    "symbology", 
+    "value", 
+    "timestamp", 
+    "deviceId", 
+    "type", 
+    "location", 
+    "jsonData", 
+    "stateVersion", 
+    "onchainId" 
+})
 public class ScanDTO
 {
     //Diese Felder sind Pflicht-Felder für die API
@@ -49,8 +60,13 @@ public class ScanDTO
     @Schema(hidden = true)
     private String id;
 
+    @Schema(description = "The amount of times this object got updated.")
+    @JsonInclude(value = Include.NON_NULL)
+    private String stateVersion;
+    
     @JsonInclude(value = Include.NON_NULL)
     private String onchain_id;
+
 
     // default constructor for Jackson (testing purpose)
     public ScanDTO() {}
@@ -85,31 +101,31 @@ public class ScanDTO
     }
 
     public String getSymbology() {
-        return symbology;
+        return this.symbology;
     }
 
     public String getValue() {
-        return value;
+        return this.value;
     }
 
     public String getTimestamp() {
-        return timestamp;
+        return this.timestamp;
     }
 
     public String getDeviceId() {
-        return deviceId;
+        return this.deviceId;
     }
 
     public String getType() {
-        return type;
+        return this.type;
     }
 
     public String getId() {
-        return id;
+        return this.id;
     }
 
     public JLocationDTO getLocation() {
-        return location;
+        return this.location;
     }
 
     public void setLocation(JLocationDTO location) {
@@ -164,5 +180,14 @@ public class ScanDTO
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     public void setOnchainId(String onchainId) {
         this.onchain_id = onchainId;
+    }
+
+    public void setStateVersion(String stateVersion) {
+        this.stateVersion = stateVersion;
+    }
+
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+    public String getStateVersion() {
+        return this.stateVersion;
     }
 }

@@ -31,9 +31,8 @@ public interface ScannerMapper {
     // @Mapping(source = "id", target = "deviceId") // Jetzt ist 'id' die Quelle (Domain)
     @Mapping(source = "packageId", target = "package_id")
     @Mapping(target = "onchainId", ignore = true)
+    @Mapping(target = "stateVersion", ignore = true)
     public ScanDTO toDto(Scan domainObj);
     public JsonDataDTO toDto(JsonData domainObj);
     public JLocationDTO toDoto(JLocation domainObj);
-
-
 }

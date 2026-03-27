@@ -72,6 +72,7 @@ public class ScanController {
         for (ScanPak scan : scans) {
             ScanDTO dto = mapper.toDto(scan.scan());
             dto.setOnchainId(scan.onChainId());
+            dto.setStateVersion(scan.stateVersion());
             scansDTO.add(dto);
         }
 
@@ -87,6 +88,7 @@ public class ScanController {
         if (scan != null) {
             ScanDTO scanDTO = mapper.toDto(scan.scan());
             scanDTO.setOnchainId(scan.onChainId());
+            scanDTO.setStateVersion(scan.stateVersion());
 
             return ResponseEntity.ok(scanDTO);
         }
@@ -106,6 +108,7 @@ public class ScanController {
             for (ScanPak scan : scans) {
                 ScanDTO scanDTO = mapper.toDto(scan.scan());
                 scanDTO.setOnchainId(scan.onChainId());
+                scanDTO.setStateVersion(scan.stateVersion());
                 scansDTO.add(scanDTO);
             }
             return ResponseEntity.ok(scansDTO);
