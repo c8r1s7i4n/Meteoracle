@@ -49,8 +49,8 @@ public class TransactionReflectionTest {
     void getTransactionById() {
         // 1. Arrange: Mock-Verhalten definieren
         List<ScanPak> mockData = List.of(
-            new ScanPak(new Scan(), "0xeee"),
-            new ScanPak(new Scan(), "0xeef")
+            new ScanPak(new Scan(), "0xeee", "4"),
+            new ScanPak(new Scan(), "0xeef", "2")
         );
         
         when(reflection.getAllScans()).thenReturn(mockData);
