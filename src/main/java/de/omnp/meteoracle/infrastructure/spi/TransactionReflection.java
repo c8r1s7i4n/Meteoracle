@@ -103,10 +103,6 @@ public class TransactionReflection implements ScanReflection {
                             // 3. Object ID (wichtig für den Rückgabewert)
                             String objectId = item.path("data").path("objectId").asText();
 
-                            // // Debug-Ausgabe zum checken
-                            // System.out.println("Checking Object: " + objectId + " with package_id: " +
-                            // packageIdFromScan);
-
                             if (targetPackageId.equals(packageIdFromScan)) {
                                 logger.info("Found Object ID: {}", objectId);
                                 return objectId;
@@ -271,9 +267,7 @@ public class TransactionReflection implements ScanReflection {
         ScanPak current = getScanById(package_id);
         if (current == null)
             return history;
-
-        System.out.println("CHECK 1");
-
+        
         String objectId = current.onChainId();
 
         try {
@@ -291,7 +285,6 @@ public class TransactionReflection implements ScanReflection {
             options.put("showEvents", true);
             options.put("showObjectChanges", true);
 
-            System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(txQueryBody));
             JsonNode txResult = executeRpcCall(txQueryBody);
             JsonNode txData = txResult.path("result").path("data");
 
