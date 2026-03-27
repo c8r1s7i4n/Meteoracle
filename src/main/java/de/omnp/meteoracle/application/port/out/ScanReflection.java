@@ -9,4 +9,6 @@ public interface ScanReflection {
 
     public ScanPak getScanById(String target_pkg_id);
 
+    public List<ScanPak> getScanTraceById(String target_pkg_id);
+
 }

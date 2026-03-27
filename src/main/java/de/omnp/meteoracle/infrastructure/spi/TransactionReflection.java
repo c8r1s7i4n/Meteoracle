@@ -2,6 +2,7 @@ package de.omnp.meteoracle.infrastructure.spi;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.mapstruct.factory.Mappers;
@@ -11,10 +12,10 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import de.omnp.meteoracle.application.port.out.ScanPak;
 import de.omnp.meteoracle.application.port.out.ScanReflection;
-import de.omnp.meteoracle.domain.vda4994.Scan;
 import de.omnp.meteoracle.infrastructure.ScannerMapper;
 import de.omnp.meteoracle.infrastructure.api.dto.JLocationDTO;
 import de.omnp.meteoracle.infrastructure.api.dto.JsonDataDTO;
@@ -195,8 +196,6 @@ public class TransactionReflection implements ScanReflection {
 
     public ScanPak getScanById(String package_id) {
         // 1. Liste sofort initialisieren (verhindert NullPointerException beim Aufrufer)
-        // TODO: Eventuell eine Liste zurückgeben?
-        List<Scan> scans = new ArrayList<>();
         mapper = Mappers.getMapper(ScannerMapper.class);
 
         try {
@@ -268,6 +267,138 @@ public class TransactionReflection implements ScanReflection {
         return null;
     }
 
+    @Override
+    public List<ScanPak> getScanTraceById(String package_id) {
+        List<ScanPak> history = new ArrayList<>();
+        
+        // 1. Get the current object state to find the ObjectID
+        ScanPak current = getScanById(package_id);
+        if (current == null) return history;
+
+        System.out.println("CHECK 1");
+        
+        String objectId = current.onChainId();
+    
+        try {
+            // 2. Query Transaction Blocks for this Object
+            // Correct: filter and options are siblings in the same object
+            ObjectNode paramsObject = objectMapper.createObjectNode();
+            paramsObject.putObject("filter").put("ChangedObject", objectId);
+            ObjectNode options = paramsObject.putObject("options");
+            options.put("showEvents", true);
+            options.put("showObjectChanges", true);
+
+            String txQueryBody = objectMapper.writeValueAsString(
+                new IotaCallWrapper<>("iotax_queryTransactionBlocks", 
+                Arrays.asList(paramsObject, null, 50, true)) 
+            );
+            options.put("showEvents", true);
+            options.put("showObjectChanges", true);
+    
+            System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(txQueryBody));
+            JsonNode txResult = executeRpcCall(txQueryBody);
+            JsonNode txData = txResult.path("result").path("data");
+    
+            Long versionZeroNumber = null;
+    
+            if (txData.isArray()) {
+                // START FROM THE BOTTOM: Iterate from the last index to 0
+                for (int i = txData.size() - 1; i >= 0; i--) {
+                    JsonNode txBlock = txData.get(i);
+            
+                    // 1. Process Events (Versions 1-N)
+                    JsonNode events = txBlock.path("events");
+                    for (JsonNode event : events) {
+                        if (event.path("type").asText().contains("NotarizationUpdated")) {
+                            JsonNode scanFields = event.path("parsedJson")
+                                                     .path("updated_state")
+                                                     .path("data");
+                            
+                            ScanDTO dto = mapJsonToScan(scanFields);
+                            
+                            // Newest scan at the top
+                            history.add(0, new ScanPak(mapper.toDomain(dto), objectId));
+                        }
+                    }
+            
+                    // 2. Look for the "Created" change (Version 0)
+                    // Since we are moving bottom-up, we likely find this in the first few iterations!
+                    if (versionZeroNumber == null) {
+                        JsonNode changes = txBlock.path("objectChanges");
+                        for (JsonNode change : changes) {
+                            if ("created".equals(change.path("type").asText()) && 
+                                objectId.equals(change.path("objectId").asText())) {
+                                
+                                versionZeroNumber = change.path("version").asLong();
+                                logger.info("Fast-found Version 0 at version: {}", versionZeroNumber);
+                                // Optimization: Once we find 'created', we don't need to check objectChanges in older blocks
+                                break; 
+                            }
+                        }
+                    }
+                }
+            }
+    
+            // 3. Fetch Version 0 (Created State)
+            if (versionZeroNumber != null) {
+                ScanPak v0 = fetchPastObject(objectId, versionZeroNumber);
+                if (v0 != null) history.add(v0);
+            }
+    
+        } catch (Exception e) {
+            logger.error("Failed to fetch history for package: {}", package_id, e);
+        }
+    
+        return history;
+    }
+    
+    /**
+     * Helper to fetch a specific version using iota_tryGetPastObject
+     */
+    private ScanPak fetchPastObject(String objectId, long version) throws IOException {
+        ObjectNode options = objectMapper.createObjectNode();
+        options.put("showContent", true);
+        options.put("showOwner", true);
+    
+        String body = objectMapper.writeValueAsString(
+            new IotaCallWrapper<>("iota_tryGetPastObject", 
+            Arrays.asList(objectId, version, options))
+        );
+    
+        JsonNode response = executeRpcCall(body);
+        JsonNode result = response.path("result");
+        JsonNode fields = result.path("details") // Note: 'details', not 'data'
+        .path("content")
+        .path("fields")
+        .path("state")
+        .path("fields")
+        .path("data")
+        .path("fields");
+
+        if (!fields.isMissingNode()) {
+            ScanDTO dto = mapJsonToScan(fields);
+            return new ScanPak(mapper.toDomain(dto), objectId);
+        }
+        return null;
+    }
+    
+    /**
+     * Generic helper to execute RPC calls (Refactor your existing OkHttp logic here)
+     */
+    private JsonNode executeRpcCall(String jsonBody) throws IOException {
+        RequestBody body = RequestBody.create(jsonBody, mediaType);
+        Request request = new Request.Builder()
+                .url(metadata.rpcUrl)
+                .post(body)
+                .addHeader("Content-Type", "application/json")
+                .build();
+    
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful() || response.body() == null) throw new IOException("RPC Error");
+            return objectMapper.readTree(response.body().string());
+        }
+    }
+
 
     public ScanDTO mapJsonToScan(JsonNode fields) {
         ScanDTO dto = new ScanDTO();
@@ -280,32 +411,54 @@ public class TransactionReflection implements ScanReflection {
         dto.setTimestamp(fields.path("timestamp").asText());
         dto.setValue(fields.path("value").asText());
     
-        // 2. Mapping der Location
-        JsonNode locationFields = fields.path("location").path("fields");
-        if (!locationFields.isMissingNode()) {
-            dto.setLocation(new JLocationDTO(
-                locationFields.path("latitude").asDouble(), 
-                locationFields.path("longitude").asDouble()
-            ));
-        }
-    
-        // 3. Mapping von JsonData (Der "JSON-im-JSON" Teil)
-        // Pfad: json_data -> fields -> content (als String!)
-        JsonNode jsonDataContent = fields.path("json_data")
-                                         .path("fields")
-                                         .path("content");
-    
-        if (!jsonDataContent.isMissingNode()) {
-            String jsonString = jsonDataContent.asText();
-            try {
-                // Wir nutzen den vorhandenen objectMapper, um den String in das DTO zu wandeln
-                JsonDataDTO jsonDataDTO = objectMapper.readValue(jsonString, JsonDataDTO.class);
-                dto.setJsonData(jsonDataDTO);
-            } catch (Exception e) {
-                logger.error("Konnte verschachtelten JsonData-String nicht parsen: " + jsonString, e);
-            }
-        }
+        // 2. Use the Smart Helper for Location (Fixes the NULL issue)
+        dto.setLocation(mapLocation(fields.path("location")));
+
+        // 3. Use the Smart Helper for JsonData (Unpacks the escaped String)
+        dto.setJsonData(mapJsonData(fields.path("json_data")));
     
         return dto;
     }
+
+    private JLocationDTO mapLocation(JsonNode locationNode) {
+        if (locationNode == null || locationNode.isMissingNode()) return null;
+        
+        // Normalize the node
+        JsonNode data = getFields(locationNode);
+        JLocationDTO loc = new JLocationDTO(data.path("latitude").asDouble(), data.path("longitude").asDouble());
+        
+        return loc;
+    }
+
+    private JsonDataDTO mapJsonData(JsonNode jsonNode) {
+        if (jsonNode == null || jsonNode.isMissingNode()) return null;
+    
+        // Use your existing getFields to handle the 'fields' wrapper
+        JsonNode dataNode = getFields(jsonNode);
+        
+        // Extract the stringified JSON from the 'content' field
+        String jsonString = dataNode.path("content").asText();
+    
+        if (jsonString == null || jsonString.isEmpty()) return null;
+    
+        try {
+            // Use the objectMapper to turn that string into the actual DTO
+            return objectMapper.readValue(jsonString, JsonDataDTO.class);
+        } catch (Exception e) {
+            logger.error("Failed to parse nested JsonData string: " + jsonString, e);
+            return null;
+        }
+    }
+
+    /**
+     * Safely extracts fields from both "Flat" (Events) and "Nested" (Objects) JSON
+     */
+    private JsonNode getFields(JsonNode node) {
+        if (node == null || node.isMissingNode()) return node;
+        // If the node has a child called "fields", that's where the data lives (Object style)
+        // Otherwise, the node itself is the data (Event style)
+        return node.has("fields") ? node.get("fields") : node;
+    }
+
+
 }

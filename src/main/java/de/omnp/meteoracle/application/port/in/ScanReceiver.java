@@ -12,4 +12,6 @@ public interface ScanReceiver {
     public List<ScanPak> getScanAll();
 
     public ScanPak getScanById(String package_id);
+
+    public List<ScanPak> getScanTraceById(String package_id);
 }

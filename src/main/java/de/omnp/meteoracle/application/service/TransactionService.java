@@ -65,5 +65,10 @@ public class TransactionService implements ScanReceiver {
     public ScanPak getScanById(String package_id) {
         return reflection.getScanById(package_id);
     }
+
+    @Override
+    public List<ScanPak> getScanTraceById(String package_id) {
+        return reflection.getScanTraceById(package_id);
+    }
     
 }

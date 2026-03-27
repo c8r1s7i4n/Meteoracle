@@ -163,4 +163,6 @@ public class ScanControllerIntegrationTest {
         assertEquals("3700123300014", scan.getValue());
         assertEquals(45, scan.getLocation().getLatitude());
     }
+
+    // TODO: Getter tests
 }

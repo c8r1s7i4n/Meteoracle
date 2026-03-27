@@ -79,8 +79,8 @@ public class ScanController {
         return ResponseEntity.ok(scansDTO);
     }
 
-    @Operation(summary = "API to get a specific owned Scan Notarization object according to the package ID")
-    @GetMapping(path = "/scan/{package_id}")
+    @Operation(summary = "API to get the current state of a specific owned Scan Notarization object according to the package ID")
+    @GetMapping(path = "/track/{package_id}")
     public ResponseEntity<ScanDTO>getScanById(@PathVariable(name = "package_id") String package_id)
     { 
         ScanPak scan = this.transaction.getScanById(package_id);
@@ -90,6 +90,27 @@ public class ScanController {
 
             return ResponseEntity.ok(scanDTO);
         }
+        return ResponseEntity.ok(null); 
+    }
+
+    @Operation(summary = "API to get the history of a specific Scan Notarization object according to the package ID")
+    @GetMapping(path = "/trace/{package_id}")
+    public ResponseEntity<List<ScanDTO>>getScanTraceById(@PathVariable(name = "package_id") String package_id)
+    { 
+        List<ScanPak> scans = new ArrayList<>();
+        scans = this.transaction.getScanTraceById(package_id);
+        
+        List<ScanDTO> scansDTO = new ArrayList<>();
+
+        if (scans != null) {
+            for (ScanPak scan : scans) {
+                ScanDTO scanDTO = mapper.toDto(scan.scan());
+                scanDTO.setOnchainId(scan.onChainId());
+                scansDTO.add(scanDTO);
+            }
+            return ResponseEntity.ok(scansDTO);
+        }
+
         return ResponseEntity.ok(null); 
     }
 }
