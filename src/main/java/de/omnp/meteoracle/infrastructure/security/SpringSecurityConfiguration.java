@@ -11,17 +11,16 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SpringSecurityConfiguration {
-    
-    @Bean
+
+	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
-			.csrf(AbstractHttpConfigurer::disable)
+				.csrf(AbstractHttpConfigurer::disable)
 
-			.authorizeHttpRequests((authorize) -> authorize
-				.anyRequest().permitAll()
-			)
-			.httpBasic(Customizer.withDefaults())
-			.formLogin(Customizer.withDefaults());
+				.authorizeHttpRequests((authorize) -> authorize
+						.anyRequest().permitAll())
+				.httpBasic(Customizer.withDefaults())
+				.formLogin(Customizer.withDefaults());
 
 		return http.build();
 	}

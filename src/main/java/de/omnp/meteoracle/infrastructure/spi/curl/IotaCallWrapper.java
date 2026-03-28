@@ -26,7 +26,8 @@ public class IotaCallWrapper<T> {
     @JsonProperty("params")
     private T params;
 
-    public IotaCallWrapper() {}
+    public IotaCallWrapper() {
+    }
 
     public IotaCallWrapper(String method, T params) {
         this.method = method;

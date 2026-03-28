@@ -12,7 +12,8 @@ import io.github.novacrypto.bip39.SeedCalculator;
 final class KeyDeriver {
 
     /**
-     * Generate a private Key out of the mnemonic phrase with given derivation path (hardened)
+     * Generate a private Key out of the mnemonic phrase with given derivation path
+     * (hardened)
      * as Long[] <br>
      * and preparing for signing with Ed25519
      * 

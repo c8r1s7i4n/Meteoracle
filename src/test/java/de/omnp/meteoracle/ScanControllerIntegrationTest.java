@@ -272,5 +272,4 @@ public class ScanControllerIntegrationTest {
                 .andExpect(jsonPath("$[1].stateVersion").value("1"))
                 .andExpect(jsonPath("$[1].location.latitude").value(10.0));
     }
-    // TODO: Getter tests
 }

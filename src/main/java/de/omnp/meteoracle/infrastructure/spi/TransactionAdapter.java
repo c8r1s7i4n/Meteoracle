@@ -48,8 +48,8 @@ public class TransactionAdapter implements ScanSender {
     private static final MediaType mediaType = MediaType.parse("application/json");
     private static final OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
-    
-            /**
+
+    /**
      * Sends an unsafe move_call through the Transaction Builder API of the RPC-Node
      * <br>
      * Prepares the tx_bytes for signing.
@@ -78,11 +78,12 @@ public class TransactionAdapter implements ScanSender {
     }
 
     private String prepareTransaction(Scan scan) {
-        
+
         String preparedCallBody = null;
         List<String> data = null;
 
-        // The order of execution is strictly enforced as defined in the smart contract entry function. | (create)
+        // The order of execution is strictly enforced as defined in the smart contract
+        // entry function. | (create)
         data = new ArrayList<String>();
         data.add(scan.getPackageId());
         data.add(scan.getSymbology());
@@ -99,16 +100,17 @@ public class TransactionAdapter implements ScanSender {
             e.printStackTrace();
             data.add(null);
         }
-        data.add("0x6");    // System clock address
-        
+        data.add("0x6"); // System clock address
+
         try {
             // Generates the Request Body
             preparedCallBody = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(
                     new IotaCallWrapper<UnsafeMoveCallParam>("unsafe_moveCall", new UnsafeMoveCallParam(
-                        metadata.wallet.getAddress(), metadata.packageId, metadata.module, metadata.createFunction, metadata.gasBudget, data)));
+                            metadata.wallet.getAddress(), metadata.packageId, metadata.module, metadata.createFunction,
+                            metadata.gasBudget, data)));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
-        }   
+        }
 
         RequestBody body = RequestBody.create(preparedCallBody, mediaType);
 
@@ -146,11 +148,12 @@ public class TransactionAdapter implements ScanSender {
 
     // For the updating process
     private String prepareTransaction(Scan post, String objectAddress) {
-        
+
         String preparedCallBody = null;
         List<String> data = null;
 
-        // The order of execution is strictly enforced as defined in the smart contract entry function. | (update)
+        // The order of execution is strictly enforced as defined in the smart contract
+        // entry function. | (update)
         data = new ArrayList<String>();
         data.add(objectAddress);
         data.add(post.getPackageId());
@@ -167,16 +170,17 @@ public class TransactionAdapter implements ScanSender {
             e.printStackTrace();
             data.add(null);
         }
-        data.add("0x6");    // System clock address
+        data.add("0x6"); // System clock address
 
         try {
             // Generates the Request Body
             preparedCallBody = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(
                     new IotaCallWrapper<UnsafeMoveCallParam>("unsafe_moveCall", new UnsafeMoveCallParam(
-                        metadata.wallet.getAddress(), metadata.packageId, metadata.module, metadata.updateFunction, metadata.gasBudget, data)));
+                            metadata.wallet.getAddress(), metadata.packageId, metadata.module, metadata.updateFunction,
+                            metadata.gasBudget, data)));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
-        }   
+        }
 
         RequestBody body = RequestBody.create(preparedCallBody, mediaType);
 
@@ -265,7 +269,7 @@ public class TransactionAdapter implements ScanSender {
 
     @Override
     public boolean updateTransaction(Scan post, String objectAddress) {
-        
+
         String txBytes = prepareTransaction(post, objectAddress);
 
         if (txBytes != null) {

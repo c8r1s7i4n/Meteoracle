@@ -4,9 +4,9 @@ import org.bitcoinj.base.Bech32;
 import org.bitcoinj.base.Bech32.Bech32Bytes;
 import org.bitcoinj.base.Bech32.Bech32Data;
 
-
 /**
- * Convert a bech32 privKey to a Hex private key via implemented 8 to 5 bit converter
+ * Convert a bech32 privKey to a Hex private key via implemented 8 to 5 bit
+ * converter
  */
 public class Bech32PrivKeyConverter {
 

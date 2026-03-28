@@ -31,9 +31,8 @@ public class GetOwnedObjectsParams {
 
         public Filter(String structType, String addressOwner) {
             this.matchAll = List.of(
-                Map.of("StructType", structType),
-                Map.of("AddressOwner", addressOwner)
-            );
+                    Map.of("StructType", structType),
+                    Map.of("AddressOwner", addressOwner));
         }
     }
 

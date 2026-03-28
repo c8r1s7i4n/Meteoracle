@@ -253,7 +253,7 @@ public class TransactionReflection implements ScanReflection {
         ScanPak current = getScanById(package_id);
         if (current == null)
             return history;
-        
+
         String objectId = current.onChainId();
 
         try {
@@ -312,7 +312,8 @@ public class TransactionReflection implements ScanReflection {
 
                                     versionZeroNumber = change.path("version").asLong();
                                     logger.info("Fast-found Version 0 at version: {}", versionZeroNumber);
-                                    // Optimization: Once we find the type 'created', we don't need to check objectChanges in
+                                    // Optimization: Once we find the type 'created', we don't need to check
+                                    // objectChanges in
                                     // older blocks
                                     break;
                                 }

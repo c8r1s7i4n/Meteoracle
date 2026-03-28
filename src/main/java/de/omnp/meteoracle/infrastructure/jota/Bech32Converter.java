@@ -2,25 +2,24 @@ package de.omnp.meteoracle.infrastructure.jota;
 
 import java.io.ByteArrayOutputStream;
 
-
 /**
- * Convert a Hex privKey to bech32 private key via implemented 8 to 5 bit converter
+ * Convert a Hex privKey to bech32 private key via implemented 8 to 5 bit
+ * converter
  */
 public class Bech32Converter {
 
-    
     private static final String ALPHABET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
 
     /** Converting (Hex) privKey to bech32 privKey */
     protected static String encodeBech32(String hrp, String hexInput) {
         byte[] data = hexToBytes(hexInput);
-        
+
         // 1. Konvertierung von 8-bit zu 5-bit
         byte[] converted = convertBits(data, 8, 5, true);
-        
+
         // 2. Bech32 Prüfsumme erstellen
         byte[] checksum = createChecksum(hrp, converted);
-        
+
         // 3. Alles zusammenfügen und encodieren
         StringBuilder sb = new StringBuilder();
         sb.append(hrp).append("1");
@@ -34,7 +33,8 @@ public class Bech32Converter {
     }
 
     /**
-     * Converts the bytes of the privKey derived from the MasterKey 
+     * Converts the bytes of the privKey derived from the MasterKey
+     * 
      * @param data
      * @param from
      * @param to
@@ -75,13 +75,14 @@ public class Bech32Converter {
     }
 
     private static int polymod(byte[] values) {
-        int[] GENERATOR = {0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3};
+        int[] GENERATOR = { 0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3 };
         int chk = 1;
         for (byte b : values) {
             int top = chk >> 25;
             chk = ((chk & 0x1ffffff) << 5) ^ (b & 0xff);
             for (int i = 0; i < 5; i++) {
-                if (((top >> i) & 1) == 1) chk ^= GENERATOR[i];
+                if (((top >> i) & 1) == 1)
+                    chk ^= GENERATOR[i];
             }
         }
         return chk;
@@ -102,7 +103,7 @@ public class Bech32Converter {
         byte[] data = new byte[len / 2];
         for (int i = 0; i < len; i += 2) {
             data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                                    + Character.digit(s.charAt(i+1), 16));
+                    + Character.digit(s.charAt(i + 1), 16));
         }
         return data;
     }

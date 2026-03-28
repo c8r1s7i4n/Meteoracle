@@ -15,8 +15,9 @@ import de.omnp.meteoracle.domain.vda4994.Scan;
 // DER SERVICE: Implementiert IN, nutzt OUT
 /**
  * Der Service ist die Implementierung des Inbound-Ports (UseCase).
- * Er orchestriert den Ablauf, ohne technische Details zu kennen. 
- * Der Service nutzt die SPI-Implementierungen genau so, wie der Controller den Service nutzt.
+ * Er orchestriert den Ablauf, ohne technische Details zu kennen.
+ * Der Service nutzt die SPI-Implementierungen genau so, wie der Controller den
+ * Service nutzt.
  */
 @Service
 public class TransactionService implements ScanReceiver {
@@ -24,7 +25,7 @@ public class TransactionService implements ScanReceiver {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     private final ScanReflection reflection;
-        
+
     // Der Service nutzt den Outbound-Port (das SPI)
     private final ScanSender sender;
 
@@ -35,10 +36,11 @@ public class TransactionService implements ScanReceiver {
     }
 
     /**
-     * Checks if the Scan's package ID is an owned Notarization object and need to get updated.
+     * Checks if the Scan's package ID is an owned Notarization object and need to
+     * get updated.
      */
     @Override
-    public boolean checkIn(Scan object) {        
+    public boolean checkIn(Scan object) {
         String objectToUpdate = new String();
         objectToUpdate = reflection.reflectTransactions(object.getPackageId());
         if (objectToUpdate != null) {
@@ -47,7 +49,7 @@ public class TransactionService implements ScanReceiver {
                 return true;
             } else {
                 return false;
-            }     
+            }
         } else if (this.sender.sendTransaction(object)) {
             return true;
         } else {
@@ -69,5 +71,5 @@ public class TransactionService implements ScanReceiver {
     public List<ScanPak> getScanTraceById(String package_id) {
         return reflection.getScanTraceById(package_id);
     }
-    
+
 }

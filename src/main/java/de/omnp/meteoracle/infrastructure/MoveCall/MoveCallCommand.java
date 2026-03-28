@@ -34,5 +34,5 @@ public class MoveCallCommand {
     public String getGasBudget() {
         return gasBudget;
     }
-    
+
 }

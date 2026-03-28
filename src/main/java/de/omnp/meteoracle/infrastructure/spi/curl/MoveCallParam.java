@@ -12,7 +12,8 @@ public class MoveCallParam {
     @JsonProperty("signatures")
     private List<String> signatures;
 
-    public MoveCallParam() {}
+    public MoveCallParam() {
+    }
 
     public MoveCallParam(String txBytes, List<String> signatures) {
         this.txBytes = txBytes;
@@ -35,5 +36,4 @@ public class MoveCallParam {
         this.signatures = signatures;
     }
 
-    
 }

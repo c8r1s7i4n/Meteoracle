@@ -32,10 +32,12 @@ public class UnsafeMoveCallParam {
     private String gasBudget; // Muss als String gesendet werden (u64 Regel)
 
     // Standard-Konstruktor für Jackson
-    public UnsafeMoveCallParam() {}
+    public UnsafeMoveCallParam() {
+    }
 
     // Komfort-Konstruktor
-    public UnsafeMoveCallParam(String signer, String packageObjectId, String module, String function, String gasBudget, List<String> data) {
+    public UnsafeMoveCallParam(String signer, String packageObjectId, String module, String function, String gasBudget,
+            List<String> data) {
         this.signer = signer;
         this.packageObjectId = packageObjectId;
         this.module = module;
@@ -45,24 +47,59 @@ public class UnsafeMoveCallParam {
     }
 
     // Getter und Setter
-    public String getSigner() { return signer; }
-    public void setSigner(String signer) { this.signer = signer; }
+    public String getSigner() {
+        return signer;
+    }
 
-    public String getPackageObjectId() { return packageObjectId; }
-    public void setPackageObjectId(String packageObjectId) { this.packageObjectId = packageObjectId; }
+    public void setSigner(String signer) {
+        this.signer = signer;
+    }
 
-    public String getModule() { return module; }
-    public void setModule(String module) { this.module = module; }
+    public String getPackageObjectId() {
+        return packageObjectId;
+    }
 
-    public String getFunction() { return function; }
-    public void setFunction(String function) { this.function = function; }
+    public void setPackageObjectId(String packageObjectId) {
+        this.packageObjectId = packageObjectId;
+    }
 
-    public List<String> getTypeArguments() { return typeArguments; }
-    public void setTypeArguments(List<String> typeArguments) { this.typeArguments = typeArguments; }
+    public String getModule() {
+        return module;
+    }
 
-    public List<String> getArguments() { return arguments; }
-    public void setArguments(List<String> arguments) { this.arguments = arguments; }
+    public void setModule(String module) {
+        this.module = module;
+    }
 
-    public String getGasBudget() { return gasBudget; }
-    public void setGasBudget(String gasBudget) { this.gasBudget = gasBudget; }
+    public String getFunction() {
+        return function;
+    }
+
+    public void setFunction(String function) {
+        this.function = function;
+    }
+
+    public List<String> getTypeArguments() {
+        return typeArguments;
+    }
+
+    public void setTypeArguments(List<String> typeArguments) {
+        this.typeArguments = typeArguments;
+    }
+
+    public List<String> getArguments() {
+        return arguments;
+    }
+
+    public void setArguments(List<String> arguments) {
+        this.arguments = arguments;
+    }
+
+    public String getGasBudget() {
+        return gasBudget;
+    }
+
+    public void setGasBudget(String gasBudget) {
+        this.gasBudget = gasBudget;
+    }
 }

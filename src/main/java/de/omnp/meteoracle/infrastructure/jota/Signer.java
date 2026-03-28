@@ -8,13 +8,14 @@ import org.bouncycastle.crypto.signers.Ed25519Signer;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class Signer {
-    
+
     static {
         Security.addProvider(new BouncyCastleProvider());
     }
-    
+
     /**
      * Sign transaction for use in the IOTA Rebased network.
+     * 
      * @return Returns a 64 Byte[] Signature
      */
     public static byte[] signHash(byte[] intentMessageHash, byte[] rawPrivKey) throws Exception {
@@ -34,13 +35,13 @@ public class Signer {
 
     public static byte[] assembleEd25519Payload(byte[] signature64, byte[] publicKey32) {
         byte flag = 0x00; // Flag for Ed25519 Pure
-        
+
         // 1 (flag) + 64 (sig) + 32 (pk) = 97 bytes
         ByteBuffer buffer = ByteBuffer.allocate(97);
         buffer.put(flag);
         buffer.put(signature64);
         buffer.put(publicKey32);
-        
+
         return buffer.array();
     }
 }
