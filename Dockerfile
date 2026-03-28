@@ -11,7 +11,7 @@ RUN groupadd omnipons && \
 # Switch to the custom user
 USER meteoracle_user
 WORKDIR /meteoracle
-COPY build/libs/meteoracle-0.0.1-SNAPSHOT.war ./meteoracle.war
+COPY build/libs/meteoracle-0.1.0-SNAPSHOT.war ./meteoracle.war
 EXPOSE 80
 ENTRYPOINT ["java","-jar","meteoracle.war"]
 
