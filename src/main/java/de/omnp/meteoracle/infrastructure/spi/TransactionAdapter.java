@@ -38,13 +38,15 @@ public class TransactionAdapter implements ScanSender {
 
     private ScannerMapper mapper;
 
+    private ObjectMapper objectMapper;
+
     public TransactionAdapter(ScannerMapper mapper, IotaMetadata metadata) {
         this.mapper = mapper;
         this.metadata = metadata;
+        this.objectMapper = new ObjectMapper();
     }
 
     // Preparing the object and metadata
-    private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final MediaType mediaType = MediaType.parse("application/json");
     private static final OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
@@ -165,9 +167,17 @@ public class TransactionAdapter implements ScanSender {
         data.add(String.valueOf(post.getLocation().getLatitude()));
         data.add(String.valueOf(post.getLocation().getLongitude()));
         try {
-            data.add(objectMapper.writeValueAsString(post.getJsonData()));
+            // 1. Convert the Domain object (from the Scan) into the DTO (JsonDataDTO)
+            // MapStruct does this. This is the object that has the @JsonInclude annotation.
+            JsonDataDTO dataDto = mapper.toDto(post.getJsonData());
+        
+            // 2. Turn the DTO into a String using the INJECTED ObjectMapper.
+            // Jackson will now see the @JsonInclude and REMOVE the null fields.
+            String jsonString = objectMapper.writeValueAsString(dataDto);
+        
+            data.add(jsonString);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            logger.error("Serialization failed", e);
             data.add(null);
         }
         data.add("0x6"); // System clock address
