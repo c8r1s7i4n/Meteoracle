@@ -8,7 +8,7 @@ plugins {
 
 group = 'de.omnp'
 version = '0.1.0-SNAPSHOT'
-description = 'Web3 Stack'
+description = 'MVP for tamper-proof shipment tracking powered by IOTA Rebased & Spring Boot.'
 
 java {
 	toolchain {
