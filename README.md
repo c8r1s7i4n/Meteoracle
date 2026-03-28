@@ -8,3 +8,13 @@ This MVP addresses the critical lack of transparency in global supply chains by 
 
 ![spring initializr](spring_initializr.png)
 
+
+## Execution
+### WAR File
+1. Place the file next to your .env file.
+2. Execute via standard java command: `java -jar <path-to-war-file>`
+
+### Docker file
+1. Download the Docker image file.
+2. Load the Docker image.
+3. Locate your .env file and pass it to the container creation process e.g <br> `sudo docker run -p 8080:8080 --env-file .env omnipons/meteoracle`
