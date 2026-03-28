@@ -39,7 +39,6 @@ public class TransactionService implements ScanReceiver {
      */
     @Override
     public boolean checkIn(Scan object) {        
-        // TODO: objectAddress from the object associated with the address and wants to get updated
         String objectToUpdate = new String();
         objectToUpdate = reflection.reflectTransactions(object.getPackageId());
         if (objectToUpdate != null) {

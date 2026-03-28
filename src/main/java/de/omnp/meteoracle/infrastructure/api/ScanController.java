@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,19 +43,19 @@ public class ScanController {
         this.mapper = mapper;
     }
 
-    // TODO: Custom error for displaying 500 error cause -> out of gas
-    // @RequestBody -> (Header) Content-Type: application/json
     @Operation(summary = "API to create or update a Scan Notarization object")
     @PostMapping(path = "/scan")
-    public ResponseEntity<Void> scan(@Valid @RequestBody ScanDTO object){
+    public ResponseEntity<Map<String, String>> scan(@Valid @RequestBody ScanDTO object) {
         logger.info("Received scan for POST transaction from device " + object.getDeviceId());
-        // Convert DTO into Domain Object
+        
         Scan post = mapper.toDomain(object);        
+        
         if (transaction.checkIn(post)) {
             return ResponseEntity.status(HttpStatus.OK).build();
         } else {
             logger.error("Returning status code " + HttpStatus.INTERNAL_SERVER_ERROR); 
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); 
+            // Sends a custom message in JSON format.
+            return ResponseEntity.status(500).body(Map.of("error", "Error 500, probably out of gas.")); 
         }
     }
 
@@ -95,7 +96,7 @@ public class ScanController {
         return ResponseEntity.ok(null); 
     }
 
-    @Operation(summary = "API to get the history of a specific Scan Notarization object according to the package ID")
+    @Operation(summary = "API to get the history of a specific owned Scan Notarization object according to the package ID")
     @GetMapping(path = "/trace/{package_id}")
     public ResponseEntity<List<ScanDTO>>getScanTraceById(@PathVariable(name = "package_id") String package_id)
     { 
