@@ -14,7 +14,7 @@ public class Signer {
     }
     
     /**
-     * TODO: Funktionsbeschreibung anpassen
+     * Sign transaction for use in the IOTA Rebased network.
      * @return Returns a 64 Byte[] Signature
      */
     public static byte[] signHash(byte[] intentMessageHash, byte[] rawPrivKey) throws Exception {

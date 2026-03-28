@@ -67,7 +67,6 @@ public class Wallet {
                     this.rawPrivKey = Hex.decode(hexOutput.substring(2));
                 }
             } catch (Exception e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             } 
         }

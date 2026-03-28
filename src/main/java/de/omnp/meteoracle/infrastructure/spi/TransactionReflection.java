@@ -42,8 +42,11 @@ public class TransactionReflection implements ScanReflection {
     private static final MediaType mediaType = MediaType.parse("application/json");
     private static final OkHttpClient client = new OkHttpClient().newBuilder().build();
 
+    private final String fullStructType;
+
     public TransactionReflection(IotaMetadata metadata) {
         this.metadata = metadata;
+        this.fullStructType = metadata.fullStructType;
     }
 
     /**
@@ -56,11 +59,6 @@ public class TransactionReflection implements ScanReflection {
     public String reflectTransactions(String targetPackageId) {
         try {
             // 1. Request Body vorbereiten
-            String fullStructType = String.format(
-                    "%1$s::notarization::Notarization<%1$s::%2$s::Scan>",
-                    metadata.packageId,
-                    metadata.module);
-
             GetOwnedObjectsParams queryParams = new GetOwnedObjectsParams(metadata.wallet.getAddress(), fullStructType);
 
             String preparedCallBody = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(
@@ -126,11 +124,6 @@ public class TransactionReflection implements ScanReflection {
         mapper = Mappers.getMapper(ScannerMapper.class);
 
         try {
-            String fullStructType = String.format(
-                    "%1$s::notarization::Notarization<%1$s::%2$s::Scan>",
-                    metadata.packageId,
-                    metadata.module);
-
             GetOwnedObjectsParams queryParams = new GetOwnedObjectsParams(metadata.wallet.getAddress(), fullStructType);
 
             String preparedCallBody = objectMapper.writeValueAsString(
@@ -193,11 +186,6 @@ public class TransactionReflection implements ScanReflection {
         mapper = Mappers.getMapper(ScannerMapper.class);
 
         try {
-            String fullStructType = String.format(
-                    "%1$s::notarization::Notarization<%1$s::%2$s::Scan>",
-                    metadata.packageId,
-                    metadata.module);
-
             GetOwnedObjectsParams queryParams = new GetOwnedObjectsParams(metadata.wallet.getAddress(), fullStructType);
 
             String preparedCallBody = objectMapper.writeValueAsString(
@@ -257,8 +245,6 @@ public class TransactionReflection implements ScanReflection {
         return null;
     }
 
-    // TODO: Check for the correct type of the created objects version number to be
-    // sure
     @Override
     public List<ScanPak> getScanTraceById(String package_id) {
         List<ScanPak> history = new ArrayList<>();
@@ -326,7 +312,7 @@ public class TransactionReflection implements ScanReflection {
 
                                     versionZeroNumber = change.path("version").asLong();
                                     logger.info("Fast-found Version 0 at version: {}", versionZeroNumber);
-                                    // Optimization: Once we find 'created', we don't need to check objectChanges in
+                                    // Optimization: Once we find the type 'created', we don't need to check objectChanges in
                                     // older blocks
                                     break;
                                 }
@@ -345,6 +331,7 @@ public class TransactionReflection implements ScanReflection {
 
         } catch (Exception e) {
             logger.error("Failed to fetch history for package: {}", package_id, e);
+            e.printStackTrace();
         }
 
         return history;

@@ -5,7 +5,9 @@ import org.springframework.stereotype.Component;
 
 import de.omnp.meteoracle.infrastructure.jota.Wallet;
 
-
+/**
+ * Contains alls information needed to interact with a specific move package object on-chain. | (smart contract)
+ */
 @Component
 public class IotaMetadata {
    
@@ -15,6 +17,8 @@ public class IotaMetadata {
     protected final String createFunction = "notarize_4994_scan";
     protected final String updateFunction = "update_4994_scan";
     protected final String privkey;
+
+    protected final String fullStructType;
 
     protected String gasBudget = "50000000";
 
@@ -27,6 +31,11 @@ public class IotaMetadata {
     
     this.rpcUrl = rpcUrl;
     this.privkey = privkey; // Values are already populated here!
-    this.wallet = new Wallet(privkey); 
+    this.wallet = new Wallet(privkey);
+    
+    fullStructType = String.format(
+        "%1$s::notarization::Notarization<%1$s::%2$s::Scan>",
+        packageId,
+        module);
     }
 }

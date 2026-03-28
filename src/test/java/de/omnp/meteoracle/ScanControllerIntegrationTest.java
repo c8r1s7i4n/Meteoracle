@@ -6,6 +6,9 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,7 +19,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.hamcrest.Matchers.hasSize;
+
 import de.omnp.meteoracle.application.port.in.ScanReceiver;
+import de.omnp.meteoracle.application.port.out.ScanPak;
 import de.omnp.meteoracle.application.service.TransactionService;
 import de.omnp.meteoracle.domain.vda4994.JLocation;
 import de.omnp.meteoracle.domain.vda4994.Scan;
@@ -164,5 +172,105 @@ public class ScanControllerIntegrationTest {
         assertEquals(45, scan.getLocation().getLatitude());
     }
 
+    @Test
+    public void testGetAllScan() throws Exception {
+        // 1. Prepare Mock Data (Domain Objects wrapped in ScanPak)
+        // These represent the data coming from your TransactionAdapter/On-chain service
+        Scan domainScan = new Scan(
+            "Package_ABC_123", 
+            "QR-CODE", 
+            "VALUE_999", 
+            "2026-03-28T10:00:00Z", 
+            "Device_001", 
+            "scanTransaction", 
+            new JLocation(52.52, 13.40), // Berlin
+            null
+        );
+
+        // ScanPak is your wrapper containing metadata (objectId, version)
+        ScanPak pak = new ScanPak(domainScan, "0xOnChainAddress123", "5");
+        
+        // 2. Stub the service call
+        // Depending on your constructor, this mock should be the one injected into TransactionService
+        when(transactionReflection.getAllScans()).thenReturn(Arrays.asList(pak));
+
+        // 3. Perform GET request and verify results
+        mockMvc.perform(get("/api/v1/scan")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                // Verify JSON structure using JsonPath
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].package_id").value("Package_ABC_123"))
+                .andExpect(jsonPath("$[0].onchainId").value("0xOnChainAddress123"))
+                .andExpect(jsonPath("$[0].stateVersion").value("5"))
+                .andExpect(jsonPath("$[0].location.latitude").value(52.52))
+                .andExpect(jsonPath("$[0].deviceId").value("Device_001"));
+    }
+
+    @Test
+    public void testGetScanById() throws Exception {
+        // 1. Prepare Mock Data (Domain Objects wrapped in ScanPak)
+        // These represent the data coming from your TransactionAdapter/On-chain service
+        Scan domainScan = new Scan(
+            "Package_ABC_123", 
+            "QR-CODE", 
+            "VALUE_999", 
+            "2026-03-28T10:00:00Z", 
+            "Device_001", 
+            "scanTransaction", 
+            new JLocation(52.52, 13.40), // Berlin
+            null
+        );
+
+        // ScanPak is your wrapper containing metadata (objectId, version)
+        ScanPak pak = new ScanPak(domainScan, "0xOnChainAddress123", "5");
+        
+        // 2. Stub the service call
+        // Depending on your constructor, this mock should be the one injected into TransactionService
+        when(transactionReflection.getScanById("Package_ABC_123")).thenReturn(pak);
+
+        // 3. Perform GET request and verify results
+        mockMvc.perform(get("/api/v1/track/Package_ABC_123") // Adjust path to your GET by ID route
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            // Use $. to access the fields of the single root object
+            .andExpect(jsonPath("$.package_id").value("Package_ABC_123"))
+            .andExpect(jsonPath("$.onchainId").value("0xOnChainAddress123"))
+            .andExpect(jsonPath("$.stateVersion").value("5"))
+            .andExpect(jsonPath("$.location.latitude").value(52.52))
+            .andExpect(jsonPath("$.deviceId").value("Device_001"));
+    }
+
+    @Test
+    public void testGetScanTrace() throws Exception {
+        // 1. Arrange: Create two historical states for the same package
+        // State 1: Version 1 (The initial scan)
+        Scan scanV1 = new Scan("Pkg_123", "EAN-13", "Value_1", "2026-03-01T10:00:00Z", 
+                               "Dev_01", "scanTransaction", new JLocation(10.0, 10.0), null);
+        ScanPak pakV1 = new ScanPak(scanV1, "0xAddress_ABC", "1");
+    
+        // State 2: Version 2 (An update/re-scan)
+        Scan scanV2 = new Scan("Pkg_123", "EAN-13", "Value_1", "2026-03-01T11:00:00Z", 
+                               "Dev_01", "scanTransaction", new JLocation(10.5, 10.5), null);
+        ScanPak pakV2 = new ScanPak(scanV2, "0xAddress_ABC", "2");
+    
+        // Stub the service to return the list (Trace)
+        List<ScanPak> trace = Arrays.asList(pakV2, pakV1); // Usually ordered newest first
+        when(transactionReflection.getScanTraceById("Pkg_123")).thenReturn(trace);
+    
+        // 2. Act & Assert
+        // IMPORTANT: Ensure this path matches the @GetMapping in your Controller!
+        mockMvc.perform(get("/api/v1/trace/Pkg_123") 
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                // Verify first element (Newest)
+                .andExpect(jsonPath("$[0].package_id").value("Pkg_123"))
+                .andExpect(jsonPath("$[0].stateVersion").value("2"))
+                .andExpect(jsonPath("$[0].location.latitude").value(10.5))
+                // Verify second element (Oldest)
+                .andExpect(jsonPath("$[1].stateVersion").value("1"))
+                .andExpect(jsonPath("$[1].location.latitude").value(10.0));
+    }
     // TODO: Getter tests
 }

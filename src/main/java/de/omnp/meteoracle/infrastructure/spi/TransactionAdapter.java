@@ -77,13 +77,12 @@ public class TransactionAdapter implements ScanSender {
         return false;
     }
 
-    // TODO: Hier noch den scan (post) miteinbeziehen
     private String prepareTransaction(Scan scan) {
         
         String preparedCallBody = null;
         List<String> data = null;
 
-        // In dieser Reihenfolge! Wie im Vertrag (SC) definiert. (Create)
+        // The order of execution is strictly enforced as defined in the smart contract entry function. | (create)
         data = new ArrayList<String>();
         data.add(scan.getPackageId());
         data.add(scan.getSymbology());
@@ -108,7 +107,6 @@ public class TransactionAdapter implements ScanSender {
                     new IotaCallWrapper<UnsafeMoveCallParam>("unsafe_moveCall", new UnsafeMoveCallParam(
                         metadata.wallet.getAddress(), metadata.packageId, metadata.module, metadata.createFunction, metadata.gasBudget, data)));
         } catch (JsonProcessingException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }   
 
@@ -140,7 +138,6 @@ public class TransactionAdapter implements ScanSender {
                 return null;
             }
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
             return null;
         }
@@ -153,7 +150,7 @@ public class TransactionAdapter implements ScanSender {
         String preparedCallBody = null;
         List<String> data = null;
 
-        // In dieser Reihenfolge! Wie im Vertrag (SC) definiert. (Update)
+        // The order of execution is strictly enforced as defined in the smart contract entry function. | (update)
         data = new ArrayList<String>();
         data.add(objectAddress);
         data.add(post.getPackageId());
@@ -178,7 +175,6 @@ public class TransactionAdapter implements ScanSender {
                     new IotaCallWrapper<UnsafeMoveCallParam>("unsafe_moveCall", new UnsafeMoveCallParam(
                         metadata.wallet.getAddress(), metadata.packageId, metadata.module, metadata.updateFunction, metadata.gasBudget, data)));
         } catch (JsonProcessingException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }   
 
@@ -211,7 +207,6 @@ public class TransactionAdapter implements ScanSender {
                 return null;
             }
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
             return null;
         }
@@ -233,7 +228,6 @@ public class TransactionAdapter implements ScanSender {
         return null;
     }
 
-    // TODO: Eventuell noch einen dry-run vorher
     private boolean executeTransaction(String txBytes, List<String> signatures) {
         try {
             String preparedCallBody = objectMapper.writerWithDefaultPrettyPrinter()
@@ -259,13 +253,11 @@ public class TransactionAdapter implements ScanSender {
                     return false;
                 }
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
                 return false;
             }
 
         } catch (JsonProcessingException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return false;
