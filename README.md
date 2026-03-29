@@ -1,10 +1,87 @@
-# Meteoracle Track & Trace API
+# Meteoracle
 
-### Summary
-MVP for tamper-proof shipment tracking powered by IOTA Rebased & Spring Boot.
+### *The Industrial Supply Chain Interoperability Layer*
 
-### Description
-This MVP addresses the critical lack of transparency in global supply chains by providing a tamper-proof record of every shipment milestone. Architected on a Spring Boot framework utilizing Hexagonal Architecture, the solution maintains a strict separation between core business logic and external technologies. This allows the system to function as a highly decoupled gateway where logistics events are processed through standardized ports and anchored onto the IOTA Rebased ledger via specialized adapters. By leveraging this modular design, the MVP ensures that data—from origin to destination—remains immutable and verifiable by all stakeholders in real-time, while providing the flexibility to scale or integrate with diverse ERP systems without compromising the integrity of the core domain.
+**Meteoracle** is a VDA-compliant interoperability layer designed to bridge the gap between legacy industrial ERP systems and decentralized ledgers. Built with a modular **Hexagonal Architecture**, it provides a standards-first gateway to anchor supply chain events onto the **IOTA Rebased** ledger—enabling verifiable data integrity without the complexity of direct DLT integration.
 
-![spring initializr](spring_initializr.png)
+---
 
+## 🚀 The Core Value Proposition
+
+Meteoracle provides an **Oracle-ready** integration point for industrial firms to secure their supply chain data with **zero architectural debt**.
+
+* **Compliance:** Native support for **VDA4994** (Global Transport Label) standards.
+* **Immutability:** Tamper-proof event anchoring via **IOTA Rebased**.
+* **Flexibility:** A decoupled "Ports & Adapters" design that allows for swapping ledgers or ERPs without refactoring core business logic.
+
+---
+
+## 🏗️ Architecture: The Hexagonal Advantage
+
+Meteoracle is architected using the **Hexagonal (Ports & Adapters) pattern** in Spring Boot. This strategic choice ensures that the core logistics domain remains isolated from external technologies.
+
+### 1. The Verified Ingress Gateway (Inbound)
+Receives HTTP requests from industrial scanners or ERP systems. It validates incoming data against VDA4994 industrial standards before it ever touches the core logic.
+
+### 2. The Domain Core (The Brain)
+Handles the business logic of shipment milestones, ensuring data consistency and state management independent of the underlying database or ledger.
+
+### 3. The IOTA Rebased Adapter (Outbound)
+Specialized adapter that handles the complexities of DLT communication, anchoring the validated "Source of Truth" to the IOTA Rebased network.
+
+
+
+---
+
+## 🛠️ Tech Stack
+
+* **Framework:** Spring Boot (Java)
+* **Architecture:** Hexagonal / Onion Architecture
+* **DLT Integration:** IOTA Rebased (Stardust-compliant)
+* **Standards:** VDA4994 (Automotive Logistics)
+* **API:** RESTful (Scanner-compatible)
+
+---
+
+## 📋 Getting Started
+
+### Prerequisites
+* Java 25+
+* Gradle 9.1.0+
+* IOTA Rebased Testnet private key
+
+### Installation
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/your-username/meteoracle.git
+    ```
+2.  **Configure your Adapters:**
+    Create .env file with the IOTA_RPC URL for the appropiate network and your private key as shown in the .env.example file.
+
+### Execution
+#### WAR File
+1. Place the file next to your .env file.
+2. Execute via standard java command: ```java -jar <path-to-war-file>```
+
+#### Docker file
+1. Download the Docker image file.
+2. Load the Docker image.
+3. Locate your .env file and pass it to the container creation process e.g <br> ```sudo docker run -p 8080:8080 --env-file <path-to-env-file> omnipons/meteoracle```
+
+---
+
+## 🤝 Contribution & Open Source
+
+As a solo-developed project, Meteoracle is built on the principles of transparency and modularity. The **Open Source** nature of the Ingress Gateway ensures that the industrial community can audit, verify, and extend the system without vendor lock-in.
+
+---
+
+## 📄 License
+[Insert your chosen license, e.g., MIT or Apache 2.0]
+
+---
+
+### **Developer Note**
+> *"Meteoracle was built on the principle of **'Architecture over Bloat.'** By adhering to strict Hexagonal patterns, the codebase remains lightweight, highly testable, and ready to adapt to the rapidly evolving landscape of decentralized industrial logistics."*
+
+---
