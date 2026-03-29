@@ -1,3 +1,10 @@
+<p align="center">
+  <img src=".github/assets/meteoracle_banner_v0-1-0-release.png" alt="Project Banner" width="600">
+</p>
+
+
+
+
 # Meteoracle
 
 ### *The Industrial Supply Chain Interoperability Layer*
