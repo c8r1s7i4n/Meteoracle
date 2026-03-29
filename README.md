@@ -1,5 +1,5 @@
 <p align="center">
-  <img src=".github/assets/meteoracle_banner_v0-1-0-release.png" alt="Project Banner" width="600">
+  <img src=".github/assets/meteoracle_banner_v0-1-0-release.jpg" alt="Project Banner" width="600">
 </p>
 
 
