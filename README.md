@@ -36,10 +36,10 @@ Specialized adapter that handles the complexities of DLT communication, anchorin
 ## 🛠️ Tech Stack
 
 * **Framework:** Spring Boot (Java)
-* **Architecture:** Hexagonal / Onion Architecture
-* **DLT Integration:** IOTA Rebased (Stardust-compliant)
+* **Architecture:** Hexagonal / Ports & Adapters
+* **DLT Integration:** IOTA Rebased
 * **Standards:** VDA4994 (Automotive Logistics)
-* **API:** RESTful (Scanner-compatible)
+* **API:** RESTful
 
 ---
 
@@ -50,13 +50,18 @@ Specialized adapter that handles the complexities of DLT communication, anchorin
 * Gradle 9.1.0+
 * IOTA Rebased Testnet private key
 
-### Installation
+### Build
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/your-username/meteoracle.git
+    git clone https://github.com/c8r1s7i4n/Meteoracle.git
     ```
 2.  **Configure your Adapters:**
     Create .env file with the IOTA_RPC URL for the appropiate network and your private key as shown in the .env.example file.
+3.  **Build:**
+    In the root of the project execute
+    ```bash
+    ./gradlew build
+    ```
 
 ### Execution
 #### WAR File
@@ -76,8 +81,14 @@ As a solo-developed project, Meteoracle is built on the principles of transparen
 
 ---
 
-## 📄 License
-[Insert your chosen license, e.g., MIT or Apache 2.0]
+## ⚖️ License
+This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.
+
+### Why AGPL?
+I believe in **Architecture over Bloat**. I provide a lean, powerful core, and in return, I ask that the community keeps the ecosystem healthy.
+
+* **Share Alike:** If you modify this software or run it as a service (SaaS), you **must** make your modified source code available to your users under the same license.
+* **No "Cloud Leeching":** This license prevents large providers from taking this architecture, wrapping it in a proprietary service, and not contributing back.
 
 ---
 
