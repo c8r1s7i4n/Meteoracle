@@ -84,10 +84,6 @@ dependencies {
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
 	// Dependencies for the Wallet
-	// // Source: https://github.com/NovaCrypto/BIP39&BIP44
-    // implementation files('libs/BIP39-2019.01.27.jar')
-	// // // Source: https://mvnrepository.com/artifact/io.github.novacrypto/ToRuntime
-	// implementation 'io.github.novacrypto:ToRuntime:2022.01.17'
 	// // Source: https://mvnrepository.com/artifact/com.madgag.spongycastle/core
 	implementation 'com.madgag.spongycastle:core:1.58.0.0'
 
