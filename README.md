@@ -89,13 +89,15 @@ As a solo-developed project, Meteoracle is built on the principles of transparen
 ---
 
 ## ⚖️ License
-This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.
 
-### Why AGPL?
-I believe in **Architecture over Bloat**. I provide a lean, powerful core, and in return, I ask that the community keeps the ecosystem healthy.
+This project is licensed under the **Apache License, Version 2.0 (Apache-2.0)**.
 
-* **Share Alike:** If you modify this software or run it as a service (SaaS), you **must** make your modified source code available to your users under the same license.
-* **No "Cloud Leeching":** This license prevents large providers from taking this architecture, wrapping it in a proprietary service, and not contributing back.
+### Why Apache 2.0?
+Meteoracle is built for **Adoption over Friction**. Using a permissive license enables:
+
+* **Commercial Integration:** Industrial firms can integrate Meteoracle into proprietary stacks without legal risk.
+* **Patent Protection:** Explicit grant of patent rights from contributors to users.
+* **Ecosystem Growth:** Lowering the barrier for IOTA-based supply chain solutions.
 
 ---
 
