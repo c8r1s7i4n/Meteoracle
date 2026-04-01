@@ -1,19 +1,18 @@
 /*
-    Meteoracle: Industrial Supply Chain Interoperability Layer
-    Copyright (C) 2026  Christian Beissmann
+    Meteoracle - Industrial Supply Chain Interoperability Layer
+    Copyright (C) 2026 Christian Beissmann
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Affero General Public License for more details.
+        http://www.apache.org/licenses/LICENSE-2.0
 
-    You should have received a copy of the GNU Affero General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 
     Original source: https://github.com/c8r1s7i4n/Meteoracle
     For contact and support, visit: https://omnipons.de
@@ -27,10 +26,14 @@ import java.util.Arrays;
 import org.bouncycastle.crypto.digests.SHA512Digest;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.params.KeyParameter;
-
-import io.github.novacrypto.bip39.SeedCalculator;
+import org.nightcode.crypto.bip39.Bip39;
+import org.nightcode.crypto.bip39.Bip39Exception;
+import org.nightcode.crypto.bip39.dictionary.Dictionary;
+import org.nightcode.crypto.bip39.dictionary.EnglishDictionary;
 
 final class KeyDeriver {
+
+
 
     /**
      * Generate a private Key out of the mnemonic phrase with given derivation path
@@ -47,29 +50,42 @@ final class KeyDeriver {
      */
     protected static byte[] keyGen(String mnemonic, long[] path) {
         // 1. Calculate seed
-        byte[] seed = new SeedCalculator().calculateSeed(mnemonic, "");
 
-        // 2. IOTA derivation: Master Key Derivation
-        // HMAC-SHA512 = Key derivation function (KDF)
-        HMac hmac = new HMac(new SHA512Digest());
-        // "ed25519 seed" fixed salt as of SLIP-0010 / BIP-32
-        hmac.init(new KeyParameter("ed25519 seed".getBytes()));
-        hmac.update(seed, 0, seed.length);
-        byte[] masterOutput = new byte[64];
-        hmac.doFinal(masterOutput, 0);
+        Dictionary dictionary = EnglishDictionary.instance();
+        Bip39 bip39 = new Bip39(dictionary);
 
-        byte[] currentKey = Arrays.copyOfRange(masterOutput, 0, 32);
-        byte[] currentChainCode = Arrays.copyOfRange(masterOutput, 32, 64);
+        byte[] seed = null;
+        
+        try {
+            seed = bip39.createSeed(mnemonic, "");
 
-        // 3. IOTA Path: e.g 44'/4218'/0'/0'/0'
-        // Every level must be hardened (index | 0x80000000)
-        for (long segment : path) {
-            byte[] result = deriveChildKey(currentKey, currentChainCode, (segment | 0x80000000L));
-            currentKey = Arrays.copyOfRange(result, 0, 32);
-            currentChainCode = Arrays.copyOfRange(result, 32, 64);
+            // 2. IOTA derivation: Master Key Derivation
+            // HMAC-SHA512 = Key derivation function (KDF)
+            HMac hmac = new HMac(new SHA512Digest());
+            // "ed25519 seed" fixed salt as of SLIP-0010 / BIP-32
+            hmac.init(new KeyParameter("ed25519 seed".getBytes()));
+            hmac.update(seed, 0, seed.length);
+            byte[] masterOutput = new byte[64];
+            hmac.doFinal(masterOutput, 0);
+
+            byte[] currentKey = Arrays.copyOfRange(masterOutput, 0, 32);
+            byte[] currentChainCode = Arrays.copyOfRange(masterOutput, 32, 64);
+
+            // 3. IOTA Path: e.g 44'/4218'/0'/0'/0'
+            // Every level must be hardened (index | 0x80000000)
+            for (long segment : path) {
+                byte[] result = deriveChildKey(currentKey, currentChainCode, (segment | 0x80000000L));
+                currentKey = Arrays.copyOfRange(result, 0, 32);
+                currentChainCode = Arrays.copyOfRange(result, 32, 64);
+            }
+            
+            return currentKey;
+        
+        } catch (Bip39Exception e) {
+            e.printStackTrace();
         }
 
-        return currentKey;
+        return null;
     }
 
     /**
